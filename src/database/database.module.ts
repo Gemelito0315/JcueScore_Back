@@ -21,7 +21,7 @@ import config from '../config';
                 password,
                 database: name,
               }),
-          synchronize: process.env.NODE_ENV === 'dev', // Solo en dev; en prod usar migraciones
+          synchronize: true, // Sincronización automática de entidades (necesario para el demo comercial en producción)
           autoLoadEntities: true,
           ssl: ssl ? { rejectUnauthorized: false } : false,
         };
