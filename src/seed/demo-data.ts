@@ -609,6 +609,18 @@ export class DemoDataService {
         }
       }
     }
+
+    // Asegurar que admin@correo.com (si fue creado por el script clásico) también tenga el rol Admin
+    const classicAdmin = await this.userRepository.findOne({
+      where: { email: 'admin@correo.com' },
+      relations: ['roles'],
+    });
+    if (classicAdmin && (!classicAdmin.roles || classicAdmin.roles.length === 0)) {
+      if (adminRole) {
+        classicAdmin.roles = [adminRole];
+        await this.userRepository.save(classicAdmin);
+      }
+    }
   }
 
   private async createProductTypes() {
