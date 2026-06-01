@@ -1,7 +1,11 @@
-import { ModulesGuardGuard } from './modules.guard.guard';
+import { ModulesGuard } from './modules.guard.guard';
+import { Reflector } from '@nestjs/core';
 
 describe('ModulesGuardGuard', () => {
   it('should be defined', () => {
-    expect(new ModulesGuardGuard()).toBeDefined();
+    const mockReflector = {
+      get: jest.fn(),
+    } as unknown as Reflector;
+    expect(new ModulesGuard(mockReflector)).toBeDefined();
   });
 });

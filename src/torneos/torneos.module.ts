@@ -8,7 +8,9 @@ import { PartidoTorneo } from './entities/partido-torneo.entity';
 import { User } from '../users/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Torneo, InscripcionTorneo, PartidoTorneo, User])],
+  imports: [
+    TypeOrmModule.forFeature([Torneo, InscripcionTorneo, PartidoTorneo, User]),
+  ],
   controllers: [TorneosController],
   providers: [TorneosService],
   exports: [TorneosService],

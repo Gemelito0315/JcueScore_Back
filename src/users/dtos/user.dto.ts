@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsString, IsNotEmpty, IsArray, ArrayNotEmpty, IsInt, IsBoolean } from "class-validator";
+import { IsString, IsNotEmpty, IsArray, ArrayNotEmpty, IsInt, IsBoolean, IsOptional } from "class-validator";
 import { PartialType, ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 
@@ -44,6 +44,7 @@ export class CreateUserDto {
     @IsInt({ each: true })
     @Type(() => Number)
     @ApiProperty({ type: [Number] })
-    readonly roleIds: number[];
+    @IsOptional()
+    readonly roleIds?: number[];
 }
 export class UpdateUserDto extends PartialType(CreateUserDto) { }

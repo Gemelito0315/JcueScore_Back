@@ -1,9 +1,8 @@
-import { Role } from 'src/roles/entities/role.entity';
+import { Role } from '../../roles/entities/role.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 
 @Entity('modules')
 export class ModuleEntity {
-
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -13,6 +12,6 @@ export class ModuleEntity {
   @Column({ nullable: true })
   description: string;
 
-  @ManyToMany(() => Role, role => role.modules)
+  @ManyToMany(() => Role, (role) => role.modules)
   roles: Role[];
 }

@@ -1,6 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import { Pedido } from './pedido.entity';
-import { Product } from '../../products/entities/product.entity';
+import { Product } from '../../productos/entities/product.entity';
 
 @Entity('pedido_items')
 export class PedidoItem {
@@ -10,7 +17,7 @@ export class PedidoItem {
   @Column({ type: 'int' })
   pedidoId: number;
 
-  @ManyToOne(() => Pedido, pedido => pedido.items)
+  @ManyToOne(() => Pedido, (pedido) => pedido.items)
   @JoinColumn({ name: 'pedidoId' })
   pedido: Pedido;
 

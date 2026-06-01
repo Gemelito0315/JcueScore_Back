@@ -1,6 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { Venue } from '../../venues/entities/venue.entity';
+import { Venue } from '../../sedes/entities/venue.entity';
 import { Resource } from '../../resources/entities/resource.entity';
 import { PedidoItem } from './pedido-item.entity';
 
@@ -9,7 +18,7 @@ export enum EstadoPedido {
   EN_PREPARACION = 'en_preparacion',
   LISTO = 'listo',
   ENTREGADO = 'entregado',
-  CANCELADO = 'cancelado'
+  CANCELADO = 'cancelado',
 }
 
 export enum MetodoPago {
@@ -18,7 +27,7 @@ export enum MetodoPago {
   DAVIPLATA = 'daviplata',
   TARJETA = 'tarjeta',
   JCEUCOINS = 'jcuecoins',
-  CUENTA_MESA = 'cuenta_mesa'
+  CUENTA_MESA = 'cuenta_mesa',
 }
 
 @Entity('pedidos')
@@ -29,7 +38,7 @@ export class Pedido {
   @Column({ type: 'int' })
   usuarioId: number;
 
-  @ManyToOne(() => User, user => user.pedidos)
+  @ManyToOne(() => User, (user) => user.pedidos)
   @JoinColumn({ name: 'usuarioId' })
   usuario: User;
 
@@ -104,7 +113,7 @@ export class Pedido {
     ubicacionMesa?: string;
   };
 
-  @OneToMany(() => PedidoItem, item => item.pedido)
+  @OneToMany(() => PedidoItem, (item) => item.pedido)
   items: PedidoItem[];
 
   @CreateDateColumn()

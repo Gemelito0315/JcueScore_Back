@@ -1,9 +1,7 @@
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { JwtAuthGuard } from './auth/guards/auth.guard';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
-@ApiTags('App')
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
@@ -13,17 +11,20 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  // Endpoint público — cualquiera puede consultar si hay mantenimiento
-  @Get('maintenance')
-  async getMaintenance() {
-    return this.appService.getMaintenance();
+  @Get('configuracion')
+  async getConfig() {
+    return await this.appService.getConfig();
   }
 
-  // Solo admin puede activar/desactivar
-  @Post('maintenance')
-  @ApiBearerAuth()
+  @Post('configuracion')
   @UseGuards(JwtAuthGuard)
-  async setMaintenance(@Body() body: { active: boolean; message?: string; estimatedTime?: string }) {
-    return this.appService.setMaintenance(body);
+  async saveConfig(@Body() body: any) {
+    return await this.appService.setConfig(body);
+  }
+
+  @Put('configuracion')
+  @UseGuards(JwtAuthGuard)
+  async updateConfig(@Body() body: any) {
+    return await this.appService.setConfig(body);
   }
 }

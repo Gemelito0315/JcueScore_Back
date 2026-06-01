@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Club } from '../../clubs/entities/club.entity';
 
@@ -11,7 +18,7 @@ export enum TipoTransaccion {
   COMPRA_PRODUCTO = 'compra_producto',
   CANJE_RECOMPENSA = 'canje_recompensa',
   BONO_ADMIN = 'bono_admin',
-  AJUSTE_SISTEMA = 'ajuste_sistema'
+  AJUSTE_SISTEMA = 'ajuste_sistema',
 }
 
 export enum FuenteTransaccion {
@@ -19,7 +26,7 @@ export enum FuenteTransaccion {
   PARTIDA_FINALIZADA = 'partida_finalizada',
   TORNEO_FINALIZADO = 'torneo_finalizado',
   SISTEMA = 'sistema',
-  ADMIN = 'admin'
+  ADMIN = 'admin',
 }
 
 @Entity('transacciones_lealtad')
@@ -27,7 +34,7 @@ export class TransaccionLealtad {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, user => user.id)
+  @ManyToOne(() => User, (user) => user.id)
   @JoinColumn({ name: 'usuarioId' })
   usuario: User;
 

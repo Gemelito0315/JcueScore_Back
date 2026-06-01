@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
@@ -27,10 +29,16 @@ import { TorneosModule } from './torneos/torneos.module';
 import { LealtadModule } from './lealtad/lealtad.module';
 import { PedidosModule } from './pedidos/pedidos.module';
 import { SeedModule } from './seed/seed.module';
+import { MantenimientoModule } from './mantenimiento/mantenimiento.module';
+import { OperacionesModule } from './operaciones/operaciones.module';
 import config from './config';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 100,
+    }]),
     ConfigModule.forRoot({
       envFilePath: enviroments[process.env.NODE_ENV || '.env'],
       load: [config],
@@ -67,8 +75,16 @@ import config from './config';
     LealtadModule,
     PedidosModule,
     SeedModule,
+    MantenimientoModule,
+    OperacionesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

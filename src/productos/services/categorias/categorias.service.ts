@@ -1,13 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProductCategory } from '../../../products/entities/product-category.entity';
-import { ProductSubcategory } from '../../../products/entities/product-subcategory.entity';
-import { ProductType } from '../../../products/entities/product-type.entity';
+import { ProductCategory } from '../../../productos/entities/product-category.entity';
+import { ProductSubcategory } from '../../../productos/entities/product-subcategory.entity';
+import { ProductType } from '../../../productos/entities/product-type.entity';
 import {
-  CreateCategoriaDto, UpdateCategoriaDto,
-  CreateSubcategoriaDto, UpdateSubcategoriaDto,
-  CreateTipoProductoDto, UpdateTipoProductoDto,
+  CreateCategoriaDto,
+  UpdateCategoriaDto,
+  CreateSubcategoriaDto,
+  UpdateSubcategoriaDto,
+  CreateTipoProductoDto,
+  UpdateTipoProductoDto,
 } from '../../dtos/categoria.dto';
 
 @Injectable()
@@ -53,7 +56,10 @@ export class CategoriasService {
   }
 
   async findOneSubcategoria(id: number) {
-    const sub = await this.subcategoriaRepo.findOne({ where: { id }, relations: ['category'] });
+    const sub = await this.subcategoriaRepo.findOne({
+      where: { id },
+      relations: ['category'],
+    });
     if (!sub) throw new NotFoundException(`Subcategoría #${id} no encontrada`);
     return sub;
   }
@@ -79,8 +85,12 @@ export class CategoriasService {
   }
 
   async findOneTipo(id: number) {
-    const tipo = await this.tipoProductoRepo.findOne({ where: { id }, relations: ['subcategory'] });
-    if (!tipo) throw new NotFoundException(`Tipo de producto #${id} no encontrado`);
+    const tipo = await this.tipoProductoRepo.findOne({
+      where: { id },
+      relations: ['subcategory'],
+    });
+    if (!tipo)
+      throw new NotFoundException(`Tipo de producto #${id} no encontrado`);
     return tipo;
   }
 

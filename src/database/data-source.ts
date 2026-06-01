@@ -5,7 +5,9 @@ import { enviroments } from '../enviroments';
 
 import { join } from 'path';
 
-const envFile = enviroments[process.env.NODE_ENV as keyof typeof enviroments] || enviroments.dev;
+const envFile =
+  enviroments[process.env.NODE_ENV as keyof typeof enviroments] ||
+  enviroments.dev;
 dotenv.config({ path: envFile });
 const configuration = config();
 

@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import { Torneo } from './torneo.entity';
 import { User } from '../../users/entities/user.entity';
 
@@ -6,7 +13,7 @@ export enum EstadoPartido {
   PENDIENTE = 'pendiente',
   EN_JUEGO = 'en_juego',
   FINALIZADO = 'finalizado',
-  CANCELADO = 'cancelado'
+  CANCELADO = 'cancelado',
 }
 
 export enum FaseTorneo {
@@ -15,7 +22,7 @@ export enum FaseTorneo {
   CUARTOS = 'cuartos',
   SEMIFINALES = 'semifinales',
   FINAL = 'final',
-  TERCER_PUESTO = 'tercer_puesto'
+  TERCER_PUESTO = 'tercer_puesto',
 }
 
 @Entity('partidos_torneo')
@@ -23,7 +30,7 @@ export class PartidoTorneo {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Torneo, torneo => torneo.partidos)
+  @ManyToOne(() => Torneo, (torneo) => torneo.partidos)
   @JoinColumn({ name: 'torneoId' })
   torneo: Torneo;
 
@@ -56,7 +63,11 @@ export class PartidoTorneo {
   @Column({ type: 'int', nullable: true })
   jugador2Innings: number;
 
-  @Column({ type: 'enum', enum: EstadoPartido, default: EstadoPartido.PENDIENTE })
+  @Column({
+    type: 'enum',
+    enum: EstadoPartido,
+    default: EstadoPartido.PENDIENTE,
+  })
   estado: EstadoPartido;
 
   @Column({ type: 'enum', enum: FaseTorneo, default: FaseTorneo.GRUPOS })

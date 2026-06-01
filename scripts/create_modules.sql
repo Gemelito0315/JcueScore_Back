@@ -1,0 +1,31 @@
+CREATE TABLE IF NOT EXISTS turno (
+  id SERIAL PRIMARY KEY,
+  "userId" INT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+  "horaInicio" TIMESTAMP NOT NULL DEFAULT NOW(),
+  "horaFin" TIMESTAMP,
+  "baseCaja" NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  "valorHora" NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  "notasApertura" TEXT,
+  "notasCierre" TEXT,
+  "efectivoContado" NUMERIC(12, 2),
+  "estado" VARCHAR(20) NOT NULL DEFAULT 'abierto'
+);
+
+CREATE TABLE IF NOT EXISTS gasto_interno (
+  id SERIAL PRIMARY KEY,
+  "turnoId" INT REFERENCES turno(id) ON DELETE CASCADE,
+  descripcion VARCHAR(255) NOT NULL,
+  monto NUMERIC(12, 2) NOT NULL,
+  tipo VARCHAR(50) NOT NULL,
+  hora TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS transferencia (
+  id SERIAL PRIMARY KEY,
+  "turnoId" INT REFERENCES turno(id) ON DELETE CASCADE,
+  cliente VARCHAR(255) NOT NULL,
+  monto NUMERIC(12, 2) NOT NULL,
+  concepto VARCHAR(255) NOT NULL,
+  foto TEXT,
+  hora TIMESTAMP NOT NULL DEFAULT NOW()
+);

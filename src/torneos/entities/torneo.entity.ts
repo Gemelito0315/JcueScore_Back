@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { InscripcionTorneo } from './inscripcion-torneo.entity';
 import { PartidoTorneo } from './partido-torneo.entity';
 
@@ -6,14 +13,14 @@ export enum FormatoTorneo {
   ROUND_ROBIN = 'round_robin',
   ELIMINACION_DIRECTA = 'eliminacion_directa',
   DOBLE_ELIMINACION = 'doble_eliminacion',
-  SUIZO = 'suizo'
+  SUIZO = 'suizo',
 }
 
 export enum EstadoTorneo {
   INSCRIPCION = 'inscripcion',
   EN_CURSO = 'en_curso',
   FINALIZADO = 'finalizado',
-  CANCELADO = 'cancelado'
+  CANCELADO = 'cancelado',
 }
 
 @Entity('torneos')
@@ -27,10 +34,18 @@ export class Torneo {
   @Column({ type: 'text', nullable: true })
   descripcion: string;
 
-  @Column({ type: 'enum', enum: FormatoTorneo, default: FormatoTorneo.ROUND_ROBIN })
+  @Column({
+    type: 'enum',
+    enum: FormatoTorneo,
+    default: FormatoTorneo.ROUND_ROBIN,
+  })
   formato: FormatoTorneo;
 
-  @Column({ type: 'enum', enum: EstadoTorneo, default: EstadoTorneo.INSCRIPCION })
+  @Column({
+    type: 'enum',
+    enum: EstadoTorneo,
+    default: EstadoTorneo.INSCRIPCION,
+  })
   estado: EstadoTorneo;
 
   @Column({ type: 'int', default: 2 })
@@ -62,10 +77,10 @@ export class Torneo {
     rondas?: number;
   };
 
-  @OneToMany(() => InscripcionTorneo, inscripcion => inscripcion.torneo)
+  @OneToMany(() => InscripcionTorneo, (inscripcion) => inscripcion.torneo)
   inscripciones: InscripcionTorneo[];
 
-  @OneToMany(() => PartidoTorneo, partido => partido.torneo)
+  @OneToMany(() => PartidoTorneo, (partido) => partido.torneo)
   partidos: PartidoTorneo[];
 
   @CreateDateColumn()

@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Resource } from '../../resources/entities/resource.entity';
 import { User } from '../../users/entities/user.entity';
 
@@ -12,31 +20,41 @@ export class Partida {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Resource, recurso => recurso.id)
+  @ManyToOne(() => Resource, (recurso) => recurso.id)
   @JoinColumn({ name: 'recursoId' })
   recurso: Resource;
 
   @Column({ type: 'int' })
   recursoId: number;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'jugador1Id' })
   jugador1: User;
 
-  @Column({ type: 'int' })
-  jugador1Id: number;
+  @Column({ type: 'int', nullable: true })
+  jugador1Id: number | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  jugador1NombreOcasional: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  jugador2NombreOcasional: string | null;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'jugador2Id' })
   jugador2: User;
 
   @Column({ type: 'int', nullable: true })
-  jugador2Id: number;
+  jugador2Id: number | null;
 
   @Column({ type: 'jsonb', nullable: true })
   marcador: Marcador;
 
-  @Column({ type: 'enum', enum: ['iniciada', 'en_juego', 'finalizada', 'pausada'], default: 'iniciada' })
+  @Column({
+    type: 'enum',
+    enum: ['iniciada', 'en_juego', 'finalizada', 'pausada'],
+    default: 'iniciada',
+  })
   estado: string;
 
   @Column({ type: 'timestamp' })
@@ -50,6 +68,9 @@ export class Partida {
 
   @Column({ type: 'text', nullable: true })
   notas: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  metodoPago: string;
 
   @CreateDateColumn()
   createdAt: Date;

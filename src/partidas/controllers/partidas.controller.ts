@@ -1,39 +1,85 @@
-import { Controller, Post, Get, Put, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PartidasService } from '../services/partidas.service';
 import { JwtAuthGuard } from '../../auth/guards/auth.guard';
 import { ModulesGuard } from '../../auth/guards/modules.guard.guard';
 import { Modules } from '../../auth/decorators/modules.decorator';
+import { IniciarPartidaDto } from '../dtos/iniciar-partida.dto';
+import { FinalizarPartidaDto } from '../dtos/finalizar-partida.dto';
 
 @ApiTags('Partidas')
-@ApiBearerAuth()
-@Modules('partidas')
-@UseGuards(JwtAuthGuard, ModulesGuard)
 @Controller('partidas')
 export class PartidasController {
-    constructor(private readonly partidasService: PartidasService) {}
+  constructor(private readonly partidasService: PartidasService) {}
 
-    @Post('iniciar')
-    @ApiOperation({ summary: 'Iniciar nueva partida' })
-    iniciarPartida(@Body() body: { resourceId: number; jugadores: string[]; startTime: string }) {
-        return this.partidasService.iniciarPartida(body);
-    }
+  @Post('iniciar')
+  @ApiBearerAuth()
+  @Modules('partidas')
+  @UseGuards(JwtAuthGuard, ModulesGuard)
+  @ApiOperation({ summary: 'Iniciar nueva partida' })
+  iniciarPartida(
+    @Body()
+    iniciarPartidaDto: IniciarPartidaDto,
+  ) {
+    return this.partidasService.iniciarPartida(iniciarPartidaDto);
+  }
 
-    @Put('finalizar')
-    @ApiOperation({ summary: 'Finalizar partida' })
-    finalizarPartida(@Body() body: { partidaId: number; marcador: { j1: number; j2: number }; endTime: string }) {
-        return this.partidasService.finalizarPartida(body);
-    }
+  @Put('finalizar')
+  @ApiBearerAuth()
+  @Modules('partidas')
+  @UseGuards(JwtAuthGuard, ModulesGuard)
+  @ApiOperation({ summary: 'Finalizar partida' })
+  finalizarPartida(
+    @Body()
+    finalizarPartidaDto: FinalizarPartidaDto,
+  ) {
+    return this.partidasService.finalizarPartida(finalizarPartidaDto);
+  }
 
-    @Get('activas')
-    @ApiOperation({ summary: 'Obtener partidas activas' })
-    obtenerPartidasActivas() {
-        return this.partidasService.obtenerPartidasActivas();
-    }
+  @Get('activas')
+  @ApiOperation({ summary: 'Obtener partidas activas (público)' })
+  obtenerPartidasActivas() {
+    return this.partidasService.obtenerPartidasActivas();
+  }
 
-    @Get(':id')
-    @ApiOperation({ summary: 'Obtener partida por ID' })
-    findOne(@Param('id') id: string) {
-        return this.partidasService.findOne(+id);
-    }
+  @Get('me/activa')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obtener partida activa del usuario logueado' })
+  getPartidaActiva(@Req() req: any) {
+    const userId = req.user.sub || req.user.id;
+    return this.partidasService.getPartidaActivaUser(userId);
+  }
+
+  @Get('ingresos-dia')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obtener ingresos del día' })
+  getIngresosDia() {
+    return this.partidasService.getIngresosDia();
+  }
+
+  @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Obtener todas las partidas' })
+  findAll(@Query('periodo') periodo: string) {
+    return this.partidasService.findAll(periodo || 'mes');
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener partida por ID (público)' })
+  findOne(@Param('id') id: string) {
+    return this.partidasService.findOne(+id);
+  }
 }

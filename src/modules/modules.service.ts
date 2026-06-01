@@ -6,23 +6,21 @@ import { CreateModuleDto } from './dtos/create-module.dto';
 
 @Injectable()
 export class ModulesService {
+  constructor(
+    @InjectRepository(ModuleEntity)
+    private moduleRepository: Repository<ModuleEntity>,
+  ) {}
 
-    constructor(
-        @InjectRepository(ModuleEntity)
-        private moduleRepository: Repository<ModuleEntity>,
-    ) { }
+  async findByIds(ids: number[]) {
+    return this.moduleRepository.findBy({ id: In(ids) });
+  }
 
-    async findByIds(ids: number[]) {
-        return this.moduleRepository.findBy({ id: In(ids) });
-    }
+  create(dto: CreateModuleDto) {
+    const module = this.moduleRepository.create(dto);
+    return this.moduleRepository.save(module);
+  }
 
-    create(dto: CreateModuleDto) {
-        const module = this.moduleRepository.create(dto);
-        return this.moduleRepository.save(module);
-    }
-
-    findAll() {
-        return this.moduleRepository.find();
-    }
-
+  findAll() {
+    return this.moduleRepository.find();
+  }
 }

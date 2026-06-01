@@ -6,7 +6,6 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 @ApiTags('Modules')
 @Controller('modules')
 export class ModulesController {
-
   constructor(private readonly modulesService: ModulesService) {}
 
   @Post()
@@ -20,5 +19,4 @@ export class ModulesController {
   findAll() {
     return this.modulesService.findAll();
   }
-
 }
