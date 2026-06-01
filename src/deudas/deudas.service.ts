@@ -5,9 +5,7 @@ import { DataSource } from 'typeorm';
 @Injectable()
 export class DeudasService {
   constructor(@InjectDataSource() private ds: DataSource) {
-    if (process.env.NODE_ENV === 'dev') {
-      this.initDb();
-    }
+    this.initDb();
   }
 
   async initDb() {
