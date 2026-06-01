@@ -82,6 +82,12 @@ export class DeudasController {
     return this.deudasService.findAll();
   }
 
+  @Get('hoy')
+  @ApiOperation({ summary: 'Listar las deudas de hoy (turno activo)' })
+  findHoy() {
+    return this.deudasService.findHoy();
+  }
+
   @Get('resumen')
   @ApiOperation({ summary: 'Resumen de deudas' })
   getSummary() {
@@ -104,6 +110,12 @@ export class DeudasController {
   @ApiOperation({ summary: 'Registrar pago de deuda' })
   pago(@Param('id', ParseIntPipe) id: number, @Body() dto: PagoDto) {
     return this.deudasService.registrarPago(id, dto.montoPago, dto.metodoPago);
+  }
+
+  @Post(':id/pasar-historial')
+  @ApiOperation({ summary: 'Pasar deuda de hoy a historial' })
+  pasarAHistorial(@Param('id', ParseIntPipe) id: number) {
+    return this.deudasService.pasarAHistorial(id);
   }
 
   @Delete(':id')

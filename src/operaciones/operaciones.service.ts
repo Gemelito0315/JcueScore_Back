@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 
@@ -106,6 +106,17 @@ export class OperacionesService {
     efectivoContado: number,
     notasCierre?: string,
   ) {
+    const pendingDebts = await this.ds.query(`
+      SELECT COUNT(*) as total 
+      FROM deuda 
+      WHERE "turnoId" = $1 AND "pasadoAHistorial" = FALSE AND estado != 'pagada'
+    `, [turnoId]);
+    
+    const count = Number(pendingDebts[0].total);
+    if (count > 0) {
+      throw new BadRequestException('No puedes cerrar el turno porque existen deudas pendientes hoy. Debes cobrarlas o pasarlas a historial antes de cerrar caja.');
+    }
+
     const result = await this.ds.query(
       `
       UPDATE turno 
@@ -287,12 +298,21 @@ export class OperacionesService {
       ORDER BY pd."fecha" DESC
     `, [t.horaInicio, t.horaFin]);
 
+    // Deudas pendientes hoy en este turno
+    const deudasPendientesRes = await this.ds.query(`
+      SELECT COALESCE(SUM(monto - "montoPagado"), 0) as total
+      FROM deuda
+      WHERE "turnoId" = $1 AND estado != 'pagada' AND "pasadoAHistorial" = FALSE
+    `, [turnoId]);
+    const totalDeudasPendientes = Number(deudasPendientesRes[0].total);
+
     return {
       ...resumen,
       productosVendidos: productosRes,
       mesasCobradas: mesasRes,
       tiempoMesas: tiempoMesasRes,
-      deudasCobradasList: deudasRes
+      deudasCobradasList: deudasRes,
+      totalDeudasPendientes
     };
   }
 

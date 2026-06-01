@@ -14,7 +14,9 @@ export class DeudasService {
         ALTER TABLE deuda 
         ADD COLUMN IF NOT EXISTS "nombreCliente" VARCHAR(255),
         ADD COLUMN IF NOT EXISTS "telefonoCliente" VARCHAR(50),
-        ADD COLUMN IF NOT EXISTS "esExterno" BOOLEAN DEFAULT FALSE;
+        ADD COLUMN IF NOT EXISTS "esExterno" BOOLEAN DEFAULT FALSE,
+        ADD COLUMN IF NOT EXISTS "turnoId" INT,
+        ADD COLUMN IF NOT EXISTS "pasadoAHistorial" BOOLEAN DEFAULT FALSE;
       `);
     } catch (e) {
       console.error('Error initializing deuda table:', e);
@@ -28,6 +30,29 @@ export class DeudasService {
       LEFT JOIN public.user u ON d."userId" = u.id
       ORDER BY d."fechaCreacion" DESC
     `);
+  }
+
+  async findHoy() {
+    const activeShift = await this.ds.query(`SELECT id FROM turno WHERE estado = 'abierto' ORDER BY "horaInicio" DESC LIMIT 1`);
+    if (activeShift.length === 0) {
+      return [];
+    }
+    const shiftId = activeShift[0].id;
+    return this.ds.query(`
+      SELECT d.*, u.name, u."lastName", u.email
+      FROM deuda d
+      LEFT JOIN public.user u ON d."userId" = u.id
+      WHERE d."turnoId" = $1 AND d."pasadoAHistorial" = FALSE
+      ORDER BY d."fechaCreacion" DESC
+    `, [shiftId]);
+  }
+
+  async pasarAHistorial(id: number) {
+    return this.ds.query(`
+      UPDATE deuda 
+      SET "pasadoAHistorial" = TRUE 
+      WHERE id = $1 RETURNING *
+    `, [id]);
   }
 
   async findByUser(userId: number) {
@@ -47,13 +72,31 @@ export class DeudasService {
     nombreCliente?: string;
     telefonoCliente?: string;
     esExterno?: boolean;
+    turnoId?: number;
   }) {
+    let shiftId = data.turnoId;
+    if (!shiftId) {
+      const activeShift = await this.ds.query(`SELECT id FROM turno WHERE estado = 'abierto' ORDER BY "horaInicio" DESC LIMIT 1`);
+      if (activeShift.length > 0) {
+        shiftId = activeShift[0].id;
+      }
+    }
+
     const result = await this.ds.query(
       `
-      INSERT INTO deuda ("userId", descripcion, monto, notas, "nombreCliente", "telefonoCliente", "esExterno")
-      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
+      INSERT INTO deuda ("userId", descripcion, monto, notas, "nombreCliente", "telefonoCliente", "esExterno", "turnoId", "pasadoAHistorial")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE) RETURNING *
     `,
-      [data.userId ?? null, data.descripcion, data.monto, data.notas ?? null, data.nombreCliente ?? null, data.telefonoCliente ?? null, data.esExterno ?? false],
+      [
+        data.userId ?? null,
+        data.descripcion,
+        data.monto,
+        data.notas ?? null,
+        data.nombreCliente ?? null,
+        data.telefonoCliente ?? null,
+        data.esExterno ?? false,
+        shiftId ?? null
+      ],
     );
     return result[0];
   }
