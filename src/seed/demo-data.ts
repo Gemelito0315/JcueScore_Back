@@ -574,6 +574,7 @@ export class DemoDataService {
     for (const userData of usersData) {
       const existing = await this.userRepository.findOne({
         where: { email: userData.email },
+        relations: ['roles'],
       });
       if (!existing) {
         const hashedPassword = await bcrypt.hash(userData.password, 10);
@@ -592,6 +593,20 @@ export class DemoDataService {
           roles: userRoles,
         });
         await this.userRepository.save(newUser);
+      } else {
+        let userRoles: Role[] = [];
+        if (userData.email === 'admin@jcuescore.com') {
+          if (adminRole) userRoles.push(adminRole);
+        } else if (userData.email === 'garitero@jcuescore.com') {
+          if (gariteroRole) userRoles.push(gariteroRole);
+        } else {
+          if (userRole) userRoles.push(userRole);
+        }
+        
+        if (!existing.roles || existing.roles.length === 0) {
+          existing.roles = userRoles;
+          await this.userRepository.save(existing);
+        }
       }
     }
   }
