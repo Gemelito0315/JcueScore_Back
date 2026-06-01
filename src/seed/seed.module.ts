@@ -12,11 +12,15 @@ import { ProductCategory } from '../productos/entities/product-category.entity';
 import { ProductSubcategory } from '../productos/entities/product-subcategory.entity';
 import { ProductType } from '../productos/entities/product-type.entity';
 
+import { Role } from '../roles/entities/role.entity';
+import { ModuleEntity } from '../modules/entities/module.entity';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       User, Resource, Venue, GameType, Club, Product,
-      ProductCategory, ProductSubcategory, ProductType
+      ProductCategory, ProductSubcategory, ProductType,
+      Role, ModuleEntity
     ]),
   ],
   providers: [DemoDataService],

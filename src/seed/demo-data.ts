@@ -11,6 +11,8 @@ import * as bcrypt from 'bcrypt';
 import { ProductCategory } from '../productos/entities/product-category.entity';
 import { ProductSubcategory } from '../productos/entities/product-subcategory.entity';
 import { ProductType } from '../productos/entities/product-type.entity';
+import { Role } from '../roles/entities/role.entity';
+import { ModuleEntity } from '../modules/entities/module.entity';
 
 @Injectable()
 export class DemoDataService {
@@ -33,10 +35,17 @@ export class DemoDataService {
     private subcategoryRepository: Repository<ProductSubcategory>,
     @InjectRepository(ProductType)
     private productTypeRepository: Repository<ProductType>,
+    @InjectRepository(Role)
+    private roleRepository: Repository<Role>,
+    @InjectRepository(ModuleEntity)
+    private moduleRepository: Repository<ModuleEntity>,
   ) {}
 
   async createDemoData() {
     console.log('Creando datos de demo...');
+
+    // Crear módulos y roles básicos
+    await this.seedModulesAndRoles();
 
     // Crear tipos de juego
     const gameTypes = await this.createGameTypes();
@@ -558,15 +567,29 @@ export class DemoDataService {
       },
     ];
 
+    const adminRole = await this.roleRepository.findOne({ where: { id: 1 } });
+    const userRole = await this.roleRepository.findOne({ where: { id: 2 } });
+    const gariteroRole = await this.roleRepository.findOne({ where: { id: 3 } });
+
     for (const userData of usersData) {
       const existing = await this.userRepository.findOne({
         where: { email: userData.email },
       });
       if (!existing) {
         const hashedPassword = await bcrypt.hash(userData.password, 10);
+        let userRoles: Role[] = [];
+        if (userData.email === 'admin@jcuescore.com') {
+          if (adminRole) userRoles.push(adminRole);
+        } else if (userData.email === 'garitero@jcuescore.com') {
+          if (gariteroRole) userRoles.push(gariteroRole);
+        } else {
+          if (userRole) userRoles.push(userRole);
+        }
+
         const newUser = this.userRepository.create({
           ...userData,
           password: hashedPassword,
+          roles: userRoles,
         });
         await this.userRepository.save(newUser);
       }
@@ -621,6 +644,69 @@ export class DemoDataService {
       typeEntities.push(existing);
     }
     return typeEntities;
+  }
+
+  private async seedModulesAndRoles() {
+    console.log('Sembrando módulos y roles...');
+    
+    // 1. Insertar roles básicos
+    const rolesData = [
+      { id: 1, name: 'ADMIN', description: 'Acceso total al sistema' },
+      { id: 2, name: 'USUARIO', description: 'Acceso al panel de usuario' },
+      { id: 3, name: 'GARITERO', description: 'Acceso al panel de garitero' }
+    ];
+
+    for (const r of rolesData) {
+      await this.roleRepository.query(
+        `INSERT INTO public.role (id, name, description) VALUES ($1, $2, $3) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description`,
+        [r.id, r.name, r.description]
+      );
+    }
+
+    // 2. Insertar módulos básicos
+    const modules = [
+      'users', 'roles', 'venues', 'billar', 'tejo', 'bolirama', 
+      'reservations', 'customers', 'inventory', 'invoicing', 'reports', 'settings',
+      'caja', 'mesas', 'reservas', 'productos', 'deudas', 'partidas', 'pedidos', 
+      'leaderboard', 'perfil'
+    ];
+
+    for (const modName of modules) {
+      await this.moduleRepository.query(
+        `INSERT INTO public.modules (name, description) VALUES ($1, $2) ON CONFLICT (name) DO NOTHING`,
+        [modName, `Módulo ${modName}`]
+      );
+    }
+
+    // 3. Asignar módulos a roles (role_modules)
+    // ADMIN (id=1) obtiene todos los módulos
+    await this.roleRepository.query(`DELETE FROM public.role_modules WHERE role_id = 1`);
+    await this.roleRepository.query(`
+      INSERT INTO public.role_modules (role_id, module_id)
+      SELECT 1, id FROM public.modules
+    `);
+
+    // GARITERO (id=3) obtiene caja, mesas, reservas, productos, deudas, partidas, pedidos, leaderboard
+    await this.roleRepository.query(`DELETE FROM public.role_modules WHERE role_id = 3`);
+    await this.roleRepository.query(`
+      INSERT INTO public.role_modules (role_id, module_id)
+      SELECT 3, id FROM public.modules 
+      WHERE name IN ('caja', 'mesas', 'reservas', 'productos', 'deudas', 'partidas', 'pedidos', 'leaderboard')
+    `);
+
+    // USUARIO (id=2) obtiene reservas, productos, leaderboard, deudas, pedidos, perfil
+    await this.roleRepository.query(`DELETE FROM public.role_modules WHERE role_id = 2`);
+    await this.roleRepository.query(`
+      INSERT INTO public.role_modules (role_id, module_id)
+      SELECT 2, id FROM public.modules 
+      WHERE name IN ('reservas', 'productos', 'leaderboard', 'deudas', 'pedidos', 'perfil')
+    `);
+
+    // Resetear las secuencias
+    await this.roleRepository.query(`SELECT setval(pg_get_serial_sequence('role', 'id'), COALESCE((SELECT MAX(id) FROM public.role), 1))`);
+    await this.roleRepository.query(`SELECT setval(pg_get_serial_sequence('modules', 'id'), COALESCE((SELECT MAX(id) FROM public.modules), 1))`);
+    
+    console.log('Módulos y roles sembrados exitosamente.');
   }
 
   async cleanDemoData() {
