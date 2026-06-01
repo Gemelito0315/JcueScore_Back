@@ -12,12 +12,15 @@ import config from '../config';
         const { user, host, name, password, port, url, ssl } = configType.dataBase;
         return {
           type: 'postgres',
-          url,
-          host,
-          port,
-          username: user,
-          password,
-          database: name,
+          ...(url
+            ? { url }
+            : {
+                host,
+                port,
+                username: user,
+                password,
+                database: name,
+              }),
           synchronize: process.env.NODE_ENV === 'dev', // Solo en dev; en prod usar migraciones
           autoLoadEntities: true,
           ssl: ssl ? { rejectUnauthorized: false } : false,

@@ -13,12 +13,15 @@ const configuration = config();
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  url: configuration.dataBase.url,
-  host: configuration.dataBase.host,
-  port: configuration.dataBase.port,
-  username: configuration.dataBase.user,
-  password: configuration.dataBase.password,
-  database: configuration.dataBase.name,
+  ...(configuration.dataBase.url
+    ? { url: configuration.dataBase.url }
+    : {
+        host: configuration.dataBase.host,
+        port: configuration.dataBase.port,
+        username: configuration.dataBase.user,
+        password: configuration.dataBase.password,
+        database: configuration.dataBase.name,
+      }),
   synchronize: false,
   logging: true,
   entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
