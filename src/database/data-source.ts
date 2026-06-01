@@ -13,6 +13,7 @@ const configuration = config();
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
+  url: configuration.dataBase.url,
   host: configuration.dataBase.host,
   port: configuration.dataBase.port,
   username: configuration.dataBase.user,
@@ -22,4 +23,5 @@ export const AppDataSource = new DataSource({
   logging: true,
   entities: [join(__dirname, '..', '**', '*.entity.{ts,js}')],
   migrations: [join(__dirname, 'migrations', '*.{ts,js}')],
+  ssl: configuration.dataBase.ssl ? { rejectUnauthorized: false } : false,
 });
