@@ -11,6 +11,14 @@ const envFile =
 dotenv.config({ path: envFile });
 const configuration = config();
 
+console.log('====================================');
+console.log('DEBUG MIGRACIONES:');
+console.log('DATABASE_URL env:', process.env.DATABASE_URL);
+console.log('DATABASE_URL config:', configuration.dataBase.url);
+console.log('POSTGRES_HOST env:', process.env.POSTGRES_HOST);
+console.log('NODE_ENV env:', process.env.NODE_ENV);
+console.log('====================================');
+
 export const AppDataSource = new DataSource({
   type: 'postgres',
   ...(configuration.dataBase.url
