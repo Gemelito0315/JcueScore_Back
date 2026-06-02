@@ -80,6 +80,24 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     const { roleIds = [], password, ...userData } = createUserDto;
+
+    // Verificar si el correo ya está registrado
+    const emailLower = userData.email.toLowerCase();
+    const existingUserByEmail = await this.userRepo.findOne({
+      where: { email: emailLower },
+    });
+    if (existingUserByEmail) {
+      throw new BadRequestException('El correo electrónico ya está registrado.');
+    }
+
+    // Verificar si el número de documento ya está registrado
+    const existingUserByDoc = await this.userRepo.findOne({
+      where: { docType: userData.docType, docNumber: userData.docNumber },
+    });
+    if (existingUserByDoc) {
+      throw new BadRequestException('El número de documento ya está registrado.');
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const roles = await this.rolesService.findByIds(roleIds);
 
@@ -91,7 +109,7 @@ export class UsersService {
 
     const newUser = this.userRepo.create({
       ...userData,
-      email: userData.email.toLowerCase(),
+      email: emailLower,
       password: hashedPassword,
       roles,
       isEmailVerified: false,
