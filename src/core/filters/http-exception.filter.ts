@@ -18,7 +18,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
+    let message = 'Error interno del servidor';
     let error = 'InternalServerError';
 
     if (exception instanceof HttpException) {
@@ -39,7 +39,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       );
       
       // Ensure we NEVER leak database queries, TypeORM trace sheets, etc. to clients
-      message = 'An unexpected error occurred. Please try again later.';
+      message = 'Ocurrió un error inesperado. Por favor, intente nuevamente más tarde.';
     }
 
     response.status(status).json({

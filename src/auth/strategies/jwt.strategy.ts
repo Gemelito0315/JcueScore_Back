@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // ✅ Buscar usuario con roles y módulos
     const user = await this.userService.findOne(payload.sub);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException('Usuario no encontrado');
     }
     // ❌ Excluimos la contraseña
     const { password, ...result } = user;

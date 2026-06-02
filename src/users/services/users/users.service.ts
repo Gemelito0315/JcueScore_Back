@@ -57,7 +57,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException(`User ${email} not found`);
+      throw new NotFoundException(`Usuario ${email} no encontrado`);
     }
     return user;
   }
@@ -68,7 +68,7 @@ export class UsersService {
       relations: ['roles'],
     });
     if (!user) {
-      throw new NotFoundException(`User #${userId} not found`);
+      throw new NotFoundException(`Usuario #${userId} no encontrado`);
     }
     return user;
   }
@@ -102,33 +102,34 @@ export class UsersService {
     const roles = await this.rolesService.findByIds(roleIds);
 
     if (roleIds.length && roles.length !== roleIds.length) {
-      throw new NotFoundException('Some roles were not found');
+      throw new NotFoundException('Algunos roles no fueron encontrados');
     }
 
     const verificationToken = crypto.randomBytes(32).toString('hex');
 
-    const newUser = this.userRepo.create({
-      ...userData,
-      email: emailLower,
-      password: hashedPassword,
-      roles,
-      isEmailVerified: false,
-      verificationToken,
+    // Usar transacción para revertir automáticamente si el envío de correo falla
+    return await this.entityManager.transaction(async (transactionalEntityManager) => {
+      const newUser = transactionalEntityManager.create(User, {
+        ...userData,
+        email: emailLower,
+        password: hashedPassword,
+        roles,
+        isEmailVerified: false,
+        verificationToken,
+      });
+
+      const savedUser = await transactionalEntityManager.save(newUser);
+
+      try {
+        await this.mailService.sendVerificationEmail(savedUser.email, verificationToken);
+      } catch (error) {
+        throw new BadRequestException(
+          'El correo ingresado no es válido o no se pudo entregar el mensaje de verificación.',
+        );
+      }
+
+      return savedUser;
     });
-    
-    const savedUser = await this.userRepo.save(newUser);
-
-    try {
-      await this.mailService.sendVerificationEmail(savedUser.email, verificationToken);
-    } catch (error) {
-      // Rollback
-      await this.userRepo.delete(savedUser.id);
-      throw new BadRequestException(
-        'El correo ingresado no es válido o no se pudo entregar el mensaje de verificación.',
-      );
-    }
-
-    return savedUser;
   }
 
   async findByVerificationToken(token: string) {
@@ -150,14 +151,14 @@ export class UsersService {
       relations: ['roles'],
     });
 
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new NotFoundException('Usuario no encontrado');
 
     // actualizar roles
     if (roleIds) {
       const roles = await this.rolesService.findByIds(roleIds);
 
       if (roles.length !== roleIds.length) {
-        throw new NotFoundException('Some roles were not found');
+        throw new NotFoundException('Algunos roles no fueron encontrados');
       }
 
       user.roles = roles;
@@ -185,7 +186,7 @@ export class UsersService {
   async deleteUser(idUser: number) {
     const user = await this.userRepo.findOne({ where: { id: idUser } });
     if (!user) {
-      throw new NotFoundException(`User #${idUser} not found`);
+      throw new NotFoundException(`Usuario #${idUser} no encontrado`);
     }
     if (user.email === 'admin@correo.com' || user.email === 'admin@jcuescore.com') {
       throw new BadRequestException(
@@ -255,7 +256,7 @@ export class UsersService {
 
   async mineLoyalty(userId: number, pointsToAdd: number, minutesToAdd: number) {
     const user = await this.userRepo.findOne({ where: { id: userId } });
-    if (!user) throw new NotFoundException(`User #${userId} not found`);
+    if (!user) throw new NotFoundException(`Usuario #${userId} no encontrado`);
 
     user.loyaltyPoints += pointsToAdd;
     user.totalStayTimeMinutes += minutesToAdd;

@@ -44,7 +44,7 @@ export class ModulesGuard implements CanActivate {
     const user = request.user;
 
     if (!user || !user.roles || user.roles.length === 0) {
-      throw new ForbiddenException('Access denied: No roles assigned to user.');
+      throw new ForbiddenException('Acceso denegado: El usuario no tiene roles asignados.');
     }
 
     const roleNames: string[] = user.roles.map((r: any) => r.name?.toLowerCase());
@@ -72,7 +72,7 @@ export class ModulesGuard implements CanActivate {
 
     if (!hasStaticAccess) {
       throw new ForbiddenException(
-        `Access denied: Missing required permission for module(s): ${requiredModules.join(', ')}`,
+        `Acceso denegado: Falta el permiso requerido para el/los módulo(s): ${requiredModules.join(', ')}`,
       );
     }
 
