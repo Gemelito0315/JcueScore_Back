@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsString, IsNotEmpty, IsArray, ArrayNotEmpty, IsInt, IsBoolean, IsOptional } from "class-validator";
+import { IsString, IsNotEmpty, IsArray, ArrayNotEmpty, IsInt, IsBoolean, IsOptional, IsEmail } from "class-validator";
 import { PartialType, ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 
@@ -24,7 +24,7 @@ export class CreateUserDto {
     @ApiProperty()
     readonly docNumber: string;
 
-    @IsString()
+    @IsEmail()
     @IsNotEmpty()
     @ApiProperty()
     readonly email: string;

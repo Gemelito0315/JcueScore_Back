@@ -9,6 +9,8 @@ import { User } from '../../entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from '../../dtos/user.dto';
 import { RolesService } from '../../../roles/services/roles.service';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import { MailService } from '../../../mail/mail.service';
 import { Pedido, EstadoPedido } from '../../../pedidos/entities/pedido.entity';
 
 @Injectable()
@@ -18,6 +20,7 @@ export class UsersService {
     @InjectRepository(User) private userRepo: Repository<User>,
     private rolesService: RolesService,
     private entityManager: EntityManager,
+    private mailService: MailService,
   ) {}
 
   async findAll() {
@@ -84,13 +87,41 @@ export class UsersService {
       throw new NotFoundException('Some roles were not found');
     }
 
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
     const newUser = this.userRepo.create({
       ...userData,
       email: userData.email.toLowerCase(),
       password: hashedPassword,
       roles,
+      isEmailVerified: false,
+      verificationToken,
     });
-    return this.userRepo.save(newUser);
+    
+    const savedUser = await this.userRepo.save(newUser);
+
+    try {
+      await this.mailService.sendVerificationEmail(savedUser.email, verificationToken);
+    } catch (error) {
+      // Rollback
+      await this.userRepo.delete(savedUser.id);
+      throw new BadRequestException(
+        'El correo ingresado no es válido o no se pudo entregar el mensaje de verificación.',
+      );
+    }
+
+    return savedUser;
+  }
+
+  async findByVerificationToken(token: string) {
+    return await this.userRepo.findOne({
+      where: { verificationToken: token },
+      relations: ['roles'],
+    });
+  }
+
+  async updateEmailVerification(user: User) {
+    return await this.userRepo.save(user);
   }
 
   async updateUser(id: number, updateUserDto: UpdateUserDto) {

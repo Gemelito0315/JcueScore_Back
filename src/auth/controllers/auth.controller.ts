@@ -1,5 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { LoginDto } from '../dtos/login.dto';
+import { VerifyDto } from '../dtos/verify.dto';
 import { AuthService } from '../services/auth.service';
 
 @Controller('auth')
@@ -11,4 +12,11 @@ export class AuthController {
     const user = await this.authService.validateUser(body.email, body.password);
     return this.authService.login(user);
   }
+
+  @Post('verify')
+  async verify(@Body() body: VerifyDto) {
+    await this.authService.verifyEmail(body.token);
+    return { message: 'Cuenta verificada exitosamente.' };
+  }
 }
+

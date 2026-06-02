@@ -4,10 +4,11 @@ import { UsersService } from './services/users/users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { RolesModule } from '../roles/roles.module';
-// import { RolesModule } from 'src/roles/roles.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), RolesModule],
+  imports: [TypeOrmModule.forFeature([User]), RolesModule, MailModule],
+
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],

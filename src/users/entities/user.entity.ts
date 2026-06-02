@@ -52,6 +52,12 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({ default: false })
+  isEmailVerified: boolean;
+
+  @Column({ nullable: true })
+  verificationToken: string | null;
+
   // ----- ECOSISTEMA COMPETITIVO Y FIDELIDAD -----
   @Column({ type: 'int', default: 1000 })
   eloRating: number;

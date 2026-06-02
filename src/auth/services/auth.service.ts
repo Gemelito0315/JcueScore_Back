@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../../users/entities/user.entity';
 import { UsersService } from '../../users/services/users/users.service';
@@ -20,8 +20,24 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (!user.isEmailVerified) {
+      throw new UnauthorizedException(
+        'Tu cuenta de correo no ha sido verificada. Por favor, verifica tu correo antes de iniciar sesión.',
+      );
+    }
+
     const { password: _, ...result } = user;
     return result;
+  }
+
+  async verifyEmail(token: string) {
+    const user = await this.usersService.findByVerificationToken(token);
+    if (!user) {
+      throw new BadRequestException('Token de verificación inválido o expirado.');
+    }
+    user.isEmailVerified = true;
+    user.verificationToken = null;
+    await this.usersService.updateEmailVerification(user);
   }
 
   async login(user: UserModel) {

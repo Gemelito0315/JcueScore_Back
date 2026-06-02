@@ -591,6 +591,7 @@ export class DemoDataService {
           ...userData,
           password: hashedPassword,
           roles: userRoles,
+          isEmailVerified: true,
         });
         await this.userRepository.save(newUser);
       } else {
@@ -605,8 +606,9 @@ export class DemoDataService {
         
         if (!existing.roles || existing.roles.length === 0) {
           existing.roles = userRoles;
-          await this.userRepository.save(existing);
         }
+        existing.isEmailVerified = true;
+        await this.userRepository.save(existing);
       }
     }
 
@@ -615,11 +617,12 @@ export class DemoDataService {
       where: { email: 'admin@correo.com' },
       relations: ['roles'],
     });
-    if (classicAdmin && (!classicAdmin.roles || classicAdmin.roles.length === 0)) {
-      if (adminRole) {
+    if (classicAdmin) {
+      if (adminRole && (!classicAdmin.roles || classicAdmin.roles.length === 0)) {
         classicAdmin.roles = [adminRole];
-        await this.userRepository.save(classicAdmin);
       }
+      classicAdmin.isEmailVerified = true;
+      await this.userRepository.save(classicAdmin);
     }
   }
 
