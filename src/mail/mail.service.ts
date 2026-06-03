@@ -57,7 +57,8 @@ export class MailService {
   }
 
   async sendVerificationEmail(to: string, token: string) {
-    const verificationLink = `http://localhost:4200/auth/verify?token=${token}`;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+    const verificationLink = `${frontendUrl}/auth/verify?token=${token}`;
 
     const mailOptions = {
       from: '"JcueScore Support" <support@jcuescore.com>',
