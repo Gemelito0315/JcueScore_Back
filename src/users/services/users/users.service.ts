@@ -90,14 +90,6 @@ export class UsersService {
       throw new BadRequestException('El correo electrónico ya está registrado.');
     }
 
-    // Verificar si el número de documento ya está registrado
-    const existingUserByDoc = await this.userRepo.findOne({
-      where: { docType: userData.docType, docNumber: userData.docNumber },
-    });
-    if (existingUserByDoc) {
-      throw new BadRequestException('El número de documento ya está registrado.');
-    }
-
     const hashedPassword = await bcrypt.hash(password, 10);
     const roles = await this.rolesService.findByIds(roleIds);
 
