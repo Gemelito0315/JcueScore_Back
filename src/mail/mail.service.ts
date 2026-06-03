@@ -18,17 +18,33 @@ export class MailService {
         process.env.SMTP_PASS
       ) {
         // Usar SMTP real configurado en .env (ej. Gmail, SendGrid, etc)
-        this.transporter = nodemailer.createTransport({
+        const port = parseInt(process.env.SMTP_PORT as string) || 587;
+        const isGmail = process.env.SMTP_HOST.toLowerCase().includes('gmail.com');
+
+        const transportConfig: any = {
           host: process.env.SMTP_HOST,
-          port: parseInt(process.env.SMTP_PORT as string) || 587,
-          secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+          port: port,
+          secure: process.env.SMTP_SECURE === 'true' || port === 465,
           auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS,
           },
-        });
+          tls: {
+            rejectUnauthorized: false,
+          },
+        };
+
+        if (isGmail) {
+          // Si es Gmail, usar el service preset de nodemailer para mayor compatibilidad
+          delete transportConfig.host;
+          delete transportConfig.port;
+          delete transportConfig.secure;
+          transportConfig.service = 'gmail';
+        }
+
+        this.transporter = nodemailer.createTransport(transportConfig);
         this.logger.log(
-          `Real SMTP Mail service initialized for user: ${process.env.SMTP_USER}`,
+          `Real SMTP Mail service initialized for user: ${process.env.SMTP_USER} (Gmail: ${isGmail})`,
         );
       } else {
         // Fallback: Usar Ethereal para desarrollo si no hay .env configurado
