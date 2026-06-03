@@ -109,7 +109,7 @@ export class UsersService {
         email: emailLower,
         password: hashedPassword,
         roles,
-        isEmailVerified: false,
+        isEmailVerified: true, // Auto-verificar el correo para evitar bloqueos de inicio de sesión
         verificationToken,
       });
 
@@ -118,8 +118,11 @@ export class UsersService {
       try {
         await this.mailService.sendVerificationEmail(savedUser.email, verificationToken);
       } catch (error) {
-        throw new BadRequestException(
-          'El correo ingresado no es válido o no se pudo entregar el mensaje de verificación.',
+        // En producción el SMTP puede fallar o estar bloqueado por Google/Render.
+        // Logueamos el error pero NO impedimos el registro del usuario.
+        console.error(
+          `[SMTP Warning] No se pudo enviar el correo de bienvenida a ${savedUser.email}:`,
+          error.message || error,
         );
       }
 
