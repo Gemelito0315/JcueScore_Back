@@ -10,6 +10,24 @@ export class DeudasService {
 
   async initDb() {
     try {
+      // Crear tabla deuda si no existe
+      await this.ds.query(`
+        CREATE TABLE IF NOT EXISTS deuda (
+          id SERIAL PRIMARY KEY,
+          "userId" INTEGER REFERENCES "user"(id) ON DELETE SET NULL,
+          descripcion VARCHAR(500) NOT NULL,
+          monto DECIMAL(12,2) NOT NULL,
+          "montoPagado" DECIMAL(12,2) NOT NULL DEFAULT 0,
+          estado VARCHAR(20) NOT NULL DEFAULT 'pendiente',
+          notes TEXT,
+          notas TEXT,
+          "fechaCreacion" TIMESTAMP NOT NULL DEFAULT NOW(),
+          "fechaPago" TIMESTAMP,
+          CONSTRAINT chk_estado CHECK (estado IN ('pendiente','parcial','pagada'))
+        );
+      `);
+
+      // Agregar columnas adicionales si no existen
       await this.ds.query(`
         ALTER TABLE deuda 
         ADD COLUMN IF NOT EXISTS "nombreCliente" VARCHAR(255),
@@ -32,7 +50,7 @@ export class DeudasService {
     return this.ds.query(`
       SELECT d.*, u.name, u."lastName", u.email
       FROM deuda d
-      LEFT JOIN public.user u ON d."userId" = u.id
+      LEFT JOIN "user" u ON d."userId" = u.id
       ORDER BY d."fechaCreacion" DESC
     `);
   }
@@ -46,7 +64,7 @@ export class DeudasService {
     return this.ds.query(`
       SELECT d.*, u.name, u."lastName", u.email
       FROM deuda d
-      LEFT JOIN public.user u ON d."userId" = u.id
+      LEFT JOIN "user" u ON d."userId" = u.id
       WHERE d."turnoId" = $1 AND d."pasadoAHistorial" = FALSE
       ORDER BY d."fechaCreacion" DESC
     `, [shiftId]);

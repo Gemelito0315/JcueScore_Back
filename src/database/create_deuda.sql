@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS deuda (
   id SERIAL PRIMARY KEY,
-  "userId" INTEGER REFERENCES public.user(id),
+  "userId" INTEGER REFERENCES "user"(id) ON DELETE SET NULL,
   descripcion VARCHAR(500) NOT NULL,
   monto DECIMAL(10,2) NOT NULL,
   "montoPagado" DECIMAL(10,2) NOT NULL DEFAULT 0,
