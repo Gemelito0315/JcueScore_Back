@@ -52,10 +52,10 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
-  @Column({ default: false })
+  @Column({ type: 'boolean', default: false })
   isEmailVerified: boolean;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   verificationToken: string | null;
 
   // ----- ECOSISTEMA COMPETITIVO Y FIDELIDAD -----
