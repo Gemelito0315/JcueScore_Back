@@ -204,18 +204,32 @@ export class PedidosService {
       throw new NotFoundException('Pedido no encontrado');
     }
 
+    if (pedido.estado === estado) {
+      return this.pedidoRepository.save(pedido);
+    }
+
     const validTransitions: Record<string, string[]> = {
       [EstadoPedido.PENDIENTE]: [
         EstadoPedido.EN_PREPARACION,
+        EstadoPedido.LISTO,
+        EstadoPedido.ENTREGADO,
         EstadoPedido.CANCELADO,
       ],
       [EstadoPedido.EN_PREPARACION]: [
         EstadoPedido.LISTO,
+        EstadoPedido.ENTREGADO,
         EstadoPedido.CANCELADO,
       ],
-      [EstadoPedido.LISTO]: [EstadoPedido.ENTREGADO, EstadoPedido.CANCELADO],
-      [EstadoPedido.ENTREGADO]: [],
-      [EstadoPedido.CANCELADO]: [],
+      [EstadoPedido.LISTO]: [
+        EstadoPedido.ENTREGADO, 
+        EstadoPedido.CANCELADO
+      ],
+      [EstadoPedido.ENTREGADO]: [
+        EstadoPedido.ENTREGADO
+      ],
+      [EstadoPedido.CANCELADO]: [
+        EstadoPedido.CANCELADO
+      ],
     };
 
     if (!validTransitions[pedido.estado].includes(estado)) {
@@ -281,6 +295,10 @@ export class PedidosService {
 
     if (!pedido) {
       throw new NotFoundException('Pedido no encontrado');
+    }
+
+    if (pedido.estado === EstadoPedido.CANCELADO) {
+      return pedido;
     }
 
     // Devolver stock de los productos
