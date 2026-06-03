@@ -1,7 +1,7 @@
 -- Crear tabla de deudas si no existe
 CREATE TABLE IF NOT EXISTS deuda (
     id SERIAL PRIMARY KEY,
-    "userId" INT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    "userId" INT REFERENCES "user"(id) ON DELETE CASCADE,
     descripcion VARCHAR(500) NOT NULL,
     monto DECIMAL(12,2) NOT NULL,
     "montoPagado" DECIMAL(12,2) NOT NULL DEFAULT 0,

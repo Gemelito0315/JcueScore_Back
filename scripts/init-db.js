@@ -17,7 +17,7 @@ async function run() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS deuda (
         id SERIAL PRIMARY KEY,
-        "userId" INTEGER NOT NULL REFERENCES public."user"(id) ON DELETE CASCADE,
+        "userId" INTEGER REFERENCES public."user"(id) ON DELETE CASCADE,
         descripcion VARCHAR(500) NOT NULL,
         monto DECIMAL(10,2) NOT NULL,
         "montoPagado" DECIMAL(10,2) NOT NULL DEFAULT 0,

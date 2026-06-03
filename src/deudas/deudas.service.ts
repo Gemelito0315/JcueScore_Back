@@ -18,8 +18,13 @@ export class DeudasService {
         ADD COLUMN IF NOT EXISTS "turnoId" INT,
         ADD COLUMN IF NOT EXISTS "pasadoAHistorial" BOOLEAN DEFAULT FALSE;
       `);
+      
+      // Permitir que userId sea null para deudas de clientes externos o mesas standalone
+      await this.ds.query(`
+        ALTER TABLE deuda ALTER COLUMN "userId" DROP NOT NULL;
+      `);
     } catch (e) {
-      console.error('Error initializing deuda table:', e);
+      console.error('Error initializing/altering deuda table:', e);
     }
   }
 
