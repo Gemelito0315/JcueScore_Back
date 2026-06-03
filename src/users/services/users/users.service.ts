@@ -82,11 +82,14 @@ export class UsersService {
     const { roleIds = [], password, ...userData } = createUserDto;
 
     // Verificar si el correo ya está registrado
-    const emailLower = userData.email.toLowerCase();
+    const emailLower = userData.email.trim().toLowerCase();
+    console.log('Attempting registration with email:', userData.email);
+    console.log('Normalized email for check:', emailLower);
     const existingUserByEmail = await this.userRepo.findOne({
-      where: { email: emailLower },
+      where: { email: emailLower, isActive: true },
     });
     if (existingUserByEmail) {
+      console.log('Existing user found for email:', emailLower);
       throw new BadRequestException('El correo electrónico ya está registrado.');
     }
 

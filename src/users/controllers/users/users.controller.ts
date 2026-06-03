@@ -25,6 +25,7 @@ export class UsersController {
   @Post('register')
   @ApiOperation({ summary: 'Registro de nuevo usuario' })
   register(@Body() payload: CreateUserDto) {
+    console.log('Register payload received:', payload);
     return this.usersService.create(payload);
   }
 

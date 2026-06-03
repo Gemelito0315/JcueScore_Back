@@ -43,8 +43,8 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({ unique: true })
-  email: string;
+  @Column()
+  email: string; // Se quitó unique para permitir reutilizar emails de usuarios desactivados
 
   @Column()
   password: string;
