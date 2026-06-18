@@ -38,7 +38,7 @@ export class PushNotificationsService {
       return; // No hay suscripciones para este usuario
     }
 
-    const validSubscriptions = [];
+    const validSubscriptions: any[] = [];
     let hasInvalidSubscriptions = false;
 
     for (const sub of user.pushSubscriptions) {

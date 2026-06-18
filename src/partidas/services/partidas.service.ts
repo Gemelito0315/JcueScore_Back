@@ -133,7 +133,7 @@ export class PartidasService {
       this.pushNotificationsService.sendNotificationToUser(jugador1.id, {
         notification: {
           title: '¡Partida Iniciada!',
-          body: `Tu partida en la mesa ${recurso.code || recurso.name} ha comenzado.`,
+          body: `Tu partida en la mesa ${recurso.code} ha comenzado.`,
           icon: 'assets/icons/icon-192x192.png',
           url: '/'
         }
@@ -143,7 +143,7 @@ export class PartidasService {
       this.pushNotificationsService.sendNotificationToUser(jugador2.id, {
         notification: {
           title: '¡Partida Iniciada!',
-          body: `Has sido asignado a una partida en la mesa ${recurso.code || recurso.name}.`,
+          body: `Has sido asignado a una partida en la mesa ${recurso.code}.`,
           icon: 'assets/icons/icon-192x192.png',
           url: '/'
         }
