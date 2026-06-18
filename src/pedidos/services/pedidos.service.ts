@@ -272,7 +272,7 @@ export class PedidosService {
         notification: {
           title: 'Actualización de Pedido',
           body: mensaje,
-          icon: 'assets/icons/icon-192x192.png',
+          icon: '/icons/icon-192x192.png',
           vibrate: [100, 50, 100],
           data: {
             dateOfArrival: Date.now(),

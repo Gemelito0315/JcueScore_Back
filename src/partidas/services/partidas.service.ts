@@ -134,8 +134,9 @@ export class PartidasService {
         notification: {
           title: '¡Partida Iniciada!',
           body: `Tu partida en la mesa ${recurso.code} ha comenzado.`,
-          icon: 'assets/icons/icon-192x192.png',
-          url: '/'
+          icon: '/icons/icon-192x192.png',
+          vibrate: [100, 50, 100],
+          data: { url: '/' }
         }
       });
     }
@@ -144,8 +145,9 @@ export class PartidasService {
         notification: {
           title: '¡Partida Iniciada!',
           body: `Has sido asignado a una partida en la mesa ${recurso.code}.`,
-          icon: 'assets/icons/icon-192x192.png',
-          url: '/'
+          icon: '/icons/icon-192x192.png',
+          vibrate: [100, 50, 100],
+          data: { url: '/' }
         }
       });
     }
