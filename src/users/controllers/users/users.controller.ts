@@ -17,7 +17,7 @@ import { CreateUserDto, UpdateUserDto } from '../../dtos/user.dto';
 import { UsersService } from '../../../users/services/users/users.service';
 import { JwtAuthGuard } from '../../../auth/guards/auth.guard';
 
-import { PushNotificationsService } from '../services/push-notifications/push-notifications.service';
+import { PushNotificationsService } from '../../services/push-notifications/push-notifications.service';
 
 @ApiTags('Users')
 @Controller('users')
