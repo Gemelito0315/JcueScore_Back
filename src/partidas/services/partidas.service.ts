@@ -128,29 +128,17 @@ export class PartidasService {
     };
     this.wsGateway.addActiveMatch(recurso.id.toString(), state);
 
-    // Enviar notificaciones push a los jugadores asignados
-    if (jugador1?.id) {
-      this.pushNotificationsService.sendNotificationToUser(jugador1.id, {
-        notification: {
-          title: '¡Partida Iniciada!',
-          body: `Tu partida en la mesa ${recurso.code} ha comenzado.`,
-          icon: '/icons/icon-192x192.png',
-          vibrate: [100, 50, 100],
-          data: { url: '/' }
-        }
-      });
-    }
-    if (jugador2?.id) {
-      this.pushNotificationsService.sendNotificationToUser(jugador2.id, {
-        notification: {
-          title: '¡Partida Iniciada!',
-          body: `Has sido asignado a una partida en la mesa ${recurso.code}.`,
-          icon: '/icons/icon-192x192.png',
-          vibrate: [100, 50, 100],
-          data: { url: '/' }
-        }
-      });
-    }
+    // Enviar notificación push global a todos los usuarios para que vayan a ver la partida
+    // (Opcional: Si necesitas no enviarle a todo el mundo a futuro, podrías hacer un filtro por rol en PushService)
+    this.pushNotificationsService.broadcastNotification({
+      notification: {
+        title: '¡Partida Iniciada!',
+        body: `Una partida en la mesa ${recurso.code} acaba de comenzar. ¡Entra para verla en vivo!`,
+        icon: '/icons/icon-192x192.png',
+        vibrate: [100, 50, 100],
+        data: { url: '/usuario/live' } // Ajusta la URL a la vista de espectadores en vivo
+      }
+    });
 
     return partida;
   }

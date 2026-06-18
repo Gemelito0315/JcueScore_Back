@@ -74,4 +74,15 @@ export class PushNotificationsService {
     const notifications = users.map(user => this.sendNotificationToUser(user.id, payload));
     await Promise.all(notifications);
   }
+
+  async broadcastNotification(payload: any) {
+    // Enviar notificación a todos los usuarios activos que tengan suscripciones
+    const users = await this.userRepo.createQueryBuilder('user')
+      .where('user.isActive = :isActive', { isActive: true })
+      .andWhere('user.pushSubscriptions IS NOT NULL')
+      .getMany();
+
+    const notifications = users.map(user => this.sendNotificationToUser(user.id, payload));
+    await Promise.all(notifications);
+  }
 }
