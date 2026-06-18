@@ -69,6 +69,9 @@ export class User {
   totalStayTimeMinutes: number;
   // ----------------------------------------------
 
+  @Column({ type: 'json', nullable: true, default: [] })
+  pushSubscriptions: any[];
+
   @ManyToMany(() => Role, (role) => role.users)
   @JoinTable({
     name: 'user_roles',

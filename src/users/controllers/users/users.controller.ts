@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Modules } from '../../../auth/decorators/modules.decorator';
@@ -16,10 +17,15 @@ import { CreateUserDto, UpdateUserDto } from '../../dtos/user.dto';
 import { UsersService } from '../../../users/services/users/users.service';
 import { JwtAuthGuard } from '../../../auth/guards/auth.guard';
 
+import { PushNotificationsService } from '../services/push-notifications/push-notifications.service';
+
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private pushNotificationsService: PushNotificationsService
+  ) {}
 
   // Endpoint público para registro
   @Post('register')
@@ -33,6 +39,19 @@ export class UsersController {
   @ApiOperation({ summary: 'Obtener escalafón de jugadores por ELO' })
   getLeaderboard() {
     return this.usersService.getLeaderboard();
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('push-subscribe')
+  @ApiOperation({ summary: 'Suscribirse a notificaciones push' })
+  async subscribeToPush(
+    @Body() subscription: any,
+    @Req() req: any,
+  ) {
+    const userId = req.user.sub || req.user.id;
+    await this.pushNotificationsService.saveSubscription(userId, subscription);
+    return { success: true };
   }
 
   @ApiBearerAuth()

@@ -10,6 +10,7 @@ import { PedidoItem } from '../entities/pedido-item.entity';
 import { User } from '../../users/entities/user.entity';
 import { Product } from '../../productos/entities/product.entity';
 import { WebsocketsGateway } from '../../websockets/websockets.gateway';
+import { PushNotificationsService } from '../../users/services/push-notifications/push-notifications.service';
 
 @Injectable()
 export class PedidosService {
@@ -23,6 +24,7 @@ export class PedidosService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private wsGateway: WebsocketsGateway,
+    private pushNotificationsService: PushNotificationsService,
   ) {}
 
   async findAll(usuarioId: number, role: string, query?: { usuarioId?: number; gariteroId?: number }) {
@@ -257,7 +259,31 @@ export class PedidosService {
       }
     }
 
-    return this.pedidoRepository.save(pedido);
+    const savedPedido = await this.pedidoRepository.save(pedido);
+
+    // Enviar notificación Push al usuario
+    let mensaje = '';
+    if (estado === EstadoPedido.EN_PREPARACION) mensaje = 'Tu pedido está siendo preparado por el garitero.';
+    if (estado === EstadoPedido.LISTO) mensaje = '¡Tu pedido está listo para ser entregado!';
+    if (estado === EstadoPedido.CANCELADO) mensaje = 'Tu pedido ha sido cancelado.';
+
+    if (mensaje) {
+      this.pushNotificationsService.sendNotificationToUser(pedido.usuarioId, {
+        notification: {
+          title: 'Actualización de Pedido',
+          body: mensaje,
+          icon: 'assets/icons/icon-192x192.png',
+          vibrate: [100, 50, 100],
+          data: {
+            dateOfArrival: Date.now(),
+            primaryKey: 1,
+            url: '/garitero' // o una url para ver el estado
+          }
+        }
+      });
+    }
+
+    return savedPedido;
   }
 
   async startPreparation(pedidoId: number, gariteroId: number) {

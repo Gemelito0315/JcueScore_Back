@@ -115,16 +115,15 @@ export class UsersService {
 
       const savedUser = await transactionalEntityManager.save(newUser);
 
-      try {
-        await this.mailService.sendVerificationEmail(savedUser.email, verificationToken);
-      } catch (error) {
+      // Ejecutamos el envío de correo de forma asíncrona (fire-and-forget) para no bloquear la respuesta HTTP
+      this.mailService.sendVerificationEmail(savedUser.email, verificationToken).catch((error) => {
         // En producción el SMTP puede fallar o estar bloqueado por Google/Render.
         // Logueamos el error pero NO impedimos el registro del usuario.
         console.error(
           `[SMTP Warning] No se pudo enviar el correo de bienvenida a ${savedUser.email}:`,
           error.message || error,
         );
-      }
+      });
 
       return savedUser;
     });

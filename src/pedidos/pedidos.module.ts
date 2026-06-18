@@ -9,6 +9,7 @@ import { Product } from '../productos/entities/product.entity';
 import { Venue } from '../sedes/entities/venue.entity';
 import { Resource } from '../resources/entities/resource.entity';
 import { WebsocketsModule } from '../websockets/websockets.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { WebsocketsModule } from '../websockets/websockets.module';
       Resource,
     ]),
     WebsocketsModule,
+    UsersModule,
   ],
   controllers: [PedidosController],
   providers: [PedidosService],

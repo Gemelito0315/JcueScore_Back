@@ -6,8 +6,10 @@ import { Partida } from './entities/partida.entity';
 import { Resource } from '../resources/entities/resource.entity';
 import { User } from '../users/entities/user.entity';
 
+import { UsersModule } from '../users/users.module';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([Partida, Resource, User])],
+  imports: [TypeOrmModule.forFeature([Partida, Resource, User]), UsersModule],
   controllers: [PartidasController],
   providers: [PartidasService],
   exports: [PartidasService],

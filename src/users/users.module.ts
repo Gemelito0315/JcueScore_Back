@@ -6,11 +6,13 @@ import { User } from './entities/user.entity';
 import { RolesModule } from '../roles/roles.module';
 import { MailModule } from '../mail/mail.module';
 
+import { PushNotificationsService } from './services/push-notifications/push-notifications.service';
+
 @Module({
   imports: [TypeOrmModule.forFeature([User]), RolesModule, MailModule],
 
   controllers: [UsersController],
-  providers: [UsersService],
-  exports: [UsersService],
+  providers: [UsersService, PushNotificationsService],
+  exports: [UsersService, PushNotificationsService],
 })
 export class UsersModule {}

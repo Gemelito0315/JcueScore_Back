@@ -6,6 +6,7 @@ import { Resource } from '../../resources/entities/resource.entity';
 import { User } from '../../users/entities/user.entity';
 import { WebsocketsGateway } from '../../websockets/websockets.gateway';
 import { OnModuleInit } from '@nestjs/common';
+import { PushNotificationsService } from '../../users/services/push-notifications/push-notifications.service';
 
 @Injectable()
 export class PartidasService {
@@ -17,6 +18,7 @@ export class PartidasService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private wsGateway: WebsocketsGateway,
+    private pushNotificationsService: PushNotificationsService,
   ) {}
 
   async onModuleInit() {
@@ -125,6 +127,28 @@ export class PartidasService {
       frame: null
     };
     this.wsGateway.addActiveMatch(recurso.id.toString(), state);
+
+    // Enviar notificaciones push a los jugadores asignados
+    if (jugador1?.id) {
+      this.pushNotificationsService.sendNotificationToUser(jugador1.id, {
+        notification: {
+          title: '¡Partida Iniciada!',
+          body: `Tu partida en la mesa ${recurso.code || recurso.name} ha comenzado.`,
+          icon: 'assets/icons/icon-192x192.png',
+          url: '/'
+        }
+      });
+    }
+    if (jugador2?.id) {
+      this.pushNotificationsService.sendNotificationToUser(jugador2.id, {
+        notification: {
+          title: '¡Partida Iniciada!',
+          body: `Has sido asignado a una partida en la mesa ${recurso.code || recurso.name}.`,
+          icon: 'assets/icons/icon-192x192.png',
+          url: '/'
+        }
+      });
+    }
 
     return partida;
   }
