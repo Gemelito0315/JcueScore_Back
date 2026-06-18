@@ -35,6 +35,23 @@ export class UsersController {
     return this.usersService.create(payload);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('test-push')
+  @ApiOperation({ summary: 'Enviar notificación push de prueba al usuario actual' })
+  async testPush(@Req() req: any) {
+    const userId = req.user.sub || req.user.id;
+    await this.pushNotificationsService.sendNotificationToUser(userId, {
+      notification: {
+        title: '¡Prueba Exitosa!',
+        body: 'Las notificaciones Push nativas están configuradas correctamente.',
+        icon: '/icons/icon-192x192.png',
+        vibrate: [200, 100, 200]
+      }
+    });
+    return { success: true, message: 'Push de prueba enviado.' };
+  }
+
   @Get('leaderboard')
   @ApiOperation({ summary: 'Obtener escalafón de jugadores por ELO' })
   getLeaderboard() {
