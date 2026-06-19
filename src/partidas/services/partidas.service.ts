@@ -128,15 +128,25 @@ export class PartidasService {
     };
     this.wsGateway.addActiveMatch(recurso.id.toString(), state);
 
-    // Enviar notificación push global a todos los usuarios para que vayan a ver la partida
-    // (Opcional: Si necesitas no enviarle a todo el mundo a futuro, podrías hacer un filtro por rol en PushService)
+    // Enviar notificación push a todos los usuarios registrados para invitarlos a ver la partida
+    const j1Name = jugador1?.name || jugadores[0] || 'Jugador 1';
+    const j2Name = jugador2?.name || jugadores[1] || null;
+    const bodyMsg = j2Name
+      ? `${j1Name} vs ${j2Name} en Mesa ${recurso.code} — ¡Entra a verla en vivo!`
+      : `${j1Name} en Mesa ${recurso.code} — ¡Partida en vivo ahora!`;
+
     this.pushNotificationsService.broadcastNotification({
       notification: {
-        title: '¡Partida Iniciada!',
-        body: `Una partida en la mesa ${recurso.code} acaba de comenzar. ¡Entra para verla en vivo!`,
+        title: '🎱 ¡Partida en Vivo!',
+        body: bodyMsg,
         icon: '/icons/icon-192x192.png',
-        vibrate: [100, 50, 100],
-        data: { url: '/usuario/live' } // Ajusta la URL a la vista de espectadores en vivo
+        badge: '/icons/icon-96x96.png',
+        vibrate: [100, 50, 100, 50, 100],
+        data: { url: '/usuario/espectador' },
+        actions: [
+          { action: 'ver', title: '👁️ Ver en vivo' },
+          { action: 'dismiss', title: 'Cerrar' }
+        ]
       }
     });
 
