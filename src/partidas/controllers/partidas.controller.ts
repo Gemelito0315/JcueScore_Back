@@ -16,11 +16,50 @@ import { ModulesGuard } from '../../auth/guards/modules.guard.guard';
 import { Modules } from '../../auth/decorators/modules.decorator';
 import { IniciarPartidaDto } from '../dtos/iniciar-partida.dto';
 import { FinalizarPartidaDto } from '../dtos/finalizar-partida.dto';
+import { PushNotificationsService } from '../../users/services/push-notifications/push-notifications.service';
 
 @ApiTags('Partidas')
 @Controller('partidas')
 export class PartidasController {
-  constructor(private readonly partidasService: PartidasService) {}
+  constructor(
+    private readonly partidasService: PartidasService,
+    private readonly pushService: PushNotificationsService,
+  ) {}
+
+  /**
+   * Endpoint público que la Mesa llama cuando inicia una partida vía WebSocket.
+   * Dispara la notificación push a todos los usuarios suscritos.
+   */
+  @Post('notify-live')
+  @ApiOperation({ summary: 'Notificar partida en vivo (llamado desde la Mesa tablet)' })
+  async notifyLive(
+    @Body() body: { mesaId: string; jugador1: string; jugador2?: string },
+  ) {
+    const { mesaId, jugador1, jugador2 } = body;
+    const bodyMsg = jugador2
+      ? `${jugador1} vs ${jugador2} en Mesa ${mesaId} — ¡Entra a verla en vivo!`
+      : `${jugador1} en Mesa ${mesaId} — ¡Partida en vivo ahora!`;
+
+    // Fire-and-forget — no bloqueamos la respuesta HTTP
+    this.pushService.broadcastNotification({
+      notification: {
+        title: '🎱 ¡Partida en Vivo!',
+        body: bodyMsg,
+        icon: '/icons/icon-192x192.png',
+        badge: '/icons/icon-96x96.png',
+        vibrate: [100, 50, 100, 50, 100],
+        data: { url: '/usuario/espectador' },
+        actions: [
+          { action: 'ver', title: '👁️ Ver en vivo' },
+          { action: 'dismiss', title: 'Cerrar' },
+        ],
+      },
+    }).catch((err) =>
+      console.error('[Push] Error enviando notificación de partida en vivo:', err),
+    );
+
+    return { success: true, message: 'Notificación enviada' };
+  }
 
   @Post('iniciar')
   @ApiBearerAuth()
