@@ -121,11 +121,16 @@ export class PedidosService {
           if (rows.length > 0) {
             const config = JSON.parse(rows[0].value);
             if (config.ubicacion && config.ubicacion.lat && config.ubicacion.lng) {
+              const uLat = parseFloat(createPedidoDto.userLat);
+              const uLng = parseFloat(createPedidoDto.userLng);
+              const cLat = parseFloat(config.ubicacion.lat);
+              const cLng = parseFloat(config.ubicacion.lng);
+
               const R = 6371e3; // metres
-              const φ1 = (config.ubicacion.lat * Math.PI) / 180; // φ, λ in radians
-              const φ2 = (createPedidoDto.userLat * Math.PI) / 180;
-              const Δφ = ((createPedidoDto.userLat - config.ubicacion.lat) * Math.PI) / 180;
-              const Δλ = ((createPedidoDto.userLng - config.ubicacion.lng) * Math.PI) / 180;
+              const φ1 = (cLat * Math.PI) / 180; // φ, λ in radians
+              const φ2 = (uLat * Math.PI) / 180;
+              const Δφ = ((uLat - cLat) * Math.PI) / 180;
+              const Δλ = ((uLng - cLng) * Math.PI) / 180;
 
               const a =
                 Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
@@ -135,7 +140,7 @@ export class PedidosService {
               const distance = R * c; // in metres
 
               if (distance > 50) {
-                throw new BadRequestException('Debes estar en el establecimiento (a menos de 50 metros) para realizar pedidos.');
+                throw new BadRequestException(`Estás a ${Math.round(distance)} metros del local (Límite: 50m). Por favor, revisa la ubicación fijada en el PC.`);
               }
             }
           }
