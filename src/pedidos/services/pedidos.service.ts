@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan, MoreThan, In } from 'typeorm';
+import { Repository, LessThan, MoreThan, In, DataSource } from 'typeorm';
 import { Pedido, EstadoPedido, MetodoPago } from '../entities/pedido.entity';
 import { PedidoItem } from '../entities/pedido-item.entity';
 import { User } from '../../users/entities/user.entity';
@@ -25,6 +25,7 @@ export class PedidosService {
     private userRepository: Repository<User>,
     private wsGateway: WebsocketsGateway,
     private pushNotificationsService: PushNotificationsService,
+    private dataSource: DataSource,
   ) {}
 
   async findAll(usuarioId: number, role: string, query?: { usuarioId?: number; gariteroId?: number }) {
@@ -108,6 +109,50 @@ export class PedidosService {
     }
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
+    // Geolocation Validation
+    const origen = createPedidoDto.metadata?.origen;
+    if (origen !== 'barra' && origen !== 'admin') {
+      if (createPedidoDto.userLat && createPedidoDto.userLng) {
+        try {
+          const rows = await this.dataSource.query(
+            `SELECT value FROM app_settings WHERE key = 'configuracion'`,
+          );
+          if (rows.length > 0) {
+            const config = JSON.parse(rows[0].value);
+            if (config.ubicacion && config.ubicacion.lat && config.ubicacion.lng) {
+              const R = 6371e3; // metres
+              const φ1 = (config.ubicacion.lat * Math.PI) / 180; // φ, λ in radians
+              const φ2 = (createPedidoDto.userLat * Math.PI) / 180;
+              const Δφ = ((createPedidoDto.userLat - config.ubicacion.lat) * Math.PI) / 180;
+              const Δλ = ((createPedidoDto.userLng - config.ubicacion.lng) * Math.PI) / 180;
+
+              const a =
+                Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+              const distance = R * c; // in metres
+
+              if (distance > 50) {
+                throw new BadRequestException('Debes estar en el establecimiento (a menos de 50 metros) para realizar pedidos.');
+              }
+            }
+          }
+        } catch (e) {
+          if (e instanceof BadRequestException) throw e;
+          console.error('Error checking geolocation:', e.message);
+        }
+      } else {
+         const rows = await this.dataSource.query(
+            `SELECT value FROM app_settings WHERE key = 'configuracion'`,
+          );
+          if (rows.length > 0) {
+            const config = JSON.parse(rows[0].value);
+            if (config.ubicacion && config.ubicacion.lat && config.ubicacion.lng) {
+               throw new BadRequestException('Se requiere habilitar el GPS y estar en el establecimiento para realizar pedidos desde tu celular.');
+            }
+          }
+      }
     }
 
     // Validar productos y stock

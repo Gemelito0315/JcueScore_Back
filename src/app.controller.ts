@@ -27,4 +27,12 @@ export class AppController {
   async updateConfig(@Body() body: any) {
     return await this.appService.setConfig(body);
   }
+
+  @Put('configuracion/ubicacion')
+  @UseGuards(JwtAuthGuard)
+  async updateLocation(@Body() body: { lat: number; lng: number }) {
+    const currentConfig = await this.appService.getConfig();
+    currentConfig.ubicacion = { lat: body.lat, lng: body.lng };
+    return await this.appService.setConfig(currentConfig);
+  }
 }
