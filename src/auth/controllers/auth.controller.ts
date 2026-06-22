@@ -1,4 +1,5 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Req } from '@nestjs/common';
+import { JwtAuthGuard } from './../../auth/guards/auth.guard';
 import { LoginDto } from '../dtos/login.dto';
 import { VerifyDto } from '../dtos/verify.dto';
 import { AuthService } from '../services/auth.service';
@@ -17,6 +18,13 @@ export class AuthController {
   async verify(@Body() body: VerifyDto) {
     await this.authService.verifyEmail(body.token);
     return { message: 'Cuenta verificada exitosamente.' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('change-password')
+  async changePassword(@Req() req: any, @Body() body: any) {
+    const userId = req.user.sub || req.user.id;
+    return this.authService.changePassword(userId, body.currentPassword, body.newPassword);
   }
 }
 

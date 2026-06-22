@@ -59,4 +59,15 @@ export class AuthService {
   //         access_token: this.jwtService.sign(payload),
   //     };
   // }
+  async changePassword(userId: number, currentPass: string, newPass: string) {
+    const user = await this.usersService.findOne(userId);
+    if (!user) throw new BadRequestException('Usuario no encontrado');
+
+    if (!(await bcrypt.compare(currentPass, user.password))) {
+      throw new BadRequestException('La contraseña actual es incorrecta');
+    }
+
+    await this.usersService.updateUser(userId, { password: newPass } as any);
+    return { message: 'Contraseña actualizada correctamente' };
+  }
 }

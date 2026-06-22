@@ -102,6 +102,22 @@ export class UsersController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  getMe(@Req() req: any) {
+    const userId = req.user.sub || req.user.id;
+    return this.usersService.findOne(userId);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Put('me')
+  updateMe(@Req() req: any, @Body() payloadUpdated: UpdateUserDto) {
+    const userId = req.user.sub || req.user.id;
+    return this.usersService.updateUser(userId, payloadUpdated);
+  }
+
+  @ApiBearerAuth()
   @Modules('users')
   @UseGuards(JwtAuthGuard, ModulesGuard)
   @Get(':userId')

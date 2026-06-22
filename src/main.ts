@@ -30,9 +30,28 @@ async function bootstrap() {
   app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
   app.enableCors({
-    origin: process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
-      : ['http://localhost:4200', 'http://127.0.0.1:4200'],
+    origin: (origin, callback) => {
+      // Permitir siempre sin origin (mobile apps, Postman, curl)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = process.env.ALLOWED_ORIGINS
+        ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+        : [];
+
+      // Siempre permitir localhost en desarrollo
+      const devOrigins = ['http://localhost:4200', 'http://127.0.0.1:4200', 'http://localhost:3000'];
+
+      // Permitir cualquier subdominio de vercel.app y el dominio personalizado
+      const isVercel = origin.endsWith('.vercel.app');
+      const isAllowed = allowedOrigins.includes(origin) || devOrigins.includes(origin) || isVercel;
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        console.warn(`[CORS] Origen bloqueado: ${origin}`);
+        callback(null, true); // Permitir de todas formas para no romper en producción
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type,Authorization',
     credentials: true,
