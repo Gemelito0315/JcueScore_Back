@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThan, MoreThan, In, DataSource } from 'typeorm';
@@ -13,7 +14,7 @@ import { WebsocketsGateway } from '../../websockets/websockets.gateway';
 import { PushNotificationsService } from '../../users/services/push-notifications/push-notifications.service';
 
 @Injectable()
-export class PedidosService {
+export class PedidosService implements OnModuleInit {
   constructor(
     @InjectRepository(Pedido)
     private pedidoRepository: Repository<Pedido>,
@@ -27,6 +28,29 @@ export class PedidosService {
     private pushNotificationsService: PushNotificationsService,
     private dataSource: DataSource,
   ) {}
+
+  async onModuleInit() {
+    try {
+      await this.dataSource.query(`
+        DO $$ BEGIN
+            ALTER TYPE pedidos_metodopago_enum ADD VALUE 'cuenta_mesa';
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+            WHEN undefined_object THEN null;
+        END $$;
+      `);
+      await this.dataSource.query(`
+        DO $$ BEGIN
+            ALTER TYPE pedidos_metodopago_enum ADD VALUE 'transferencia';
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+            WHEN undefined_object THEN null;
+        END $$;
+      `);
+    } catch(e) {
+      console.log('Enum fix failed:', e.message);
+    }
+  }
 
   async findAll(usuarioId: number, role: string, query?: { usuarioId?: number; gariteroId?: number }) {
     if (role === 'admin' || role === 'garitero') {

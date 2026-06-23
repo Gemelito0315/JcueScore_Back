@@ -59,8 +59,8 @@ export class Pedido {
   @Column({ type: 'enum', enum: EstadoPedido, default: EstadoPedido.PENDIENTE })
   estado: EstadoPedido;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  metodoPago: string;
+  @Column({ type: 'enum', enum: MetodoPago, nullable: true })
+  metodoPago: MetodoPago;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   subtotal: number;
