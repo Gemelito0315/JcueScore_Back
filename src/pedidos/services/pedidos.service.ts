@@ -124,13 +124,21 @@ export class PedidosService implements OnModuleInit {
     const { items, recursoId, notas, metodoPago, direccionEntrega } =
       createPedidoDto;
 
+    const origen = createPedidoDto.metadata?.origen;
+    
+    // Si la venta es desde la barra para un cliente registrado, usar el ID de ese cliente
+    let finalUsuarioId = usuarioId;
+    if (origen === 'barra' && createPedidoDto.usuarioId) {
+      finalUsuarioId = createPedidoDto.usuarioId;
+    }
+
     // Validar usuario, si no existe usar usuario 1 (admin/default) por fallback
     let usuario = await this.userRepository.findOne({
-      where: { id: usuarioId },
+      where: { id: finalUsuarioId },
     });
     if (!usuario) {
       usuario = await this.userRepository.findOne({ where: { id: 1 } });
-      usuarioId = 1;
+      finalUsuarioId = 1;
     }
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
@@ -230,7 +238,7 @@ export class PedidosService implements OnModuleInit {
 
     // Crear pedido
     const pedido = this.pedidoRepository.create({
-      usuarioId,
+      usuarioId: finalUsuarioId,
       venueId: 1, // Asociar al club 1 por defecto
       recursoId,
       estado: EstadoPedido.PENDIENTE,
@@ -275,6 +283,43 @@ export class PedidosService implements OnModuleInit {
       console.error('Error creating pedido:', error);
       throw new BadRequestException('Error al crear pedido: ' + error.message);
     }
+  }
+
+  async asignarTitular(pedidoIds: number[], nuevoUsuarioId: number | null, nuevoNombreCliente?: string) {
+    if (!pedidoIds || pedidoIds.length === 0) return { success: false };
+    
+    // Find all pedidos
+    const pedidos = await this.pedidoRepository.find({
+      where: { id: In(pedidoIds) }
+    });
+
+    if (!pedidos.length) return { success: false };
+
+    for (const p of pedidos) {
+      if (nuevoUsuarioId) {
+        // Asignar a cliente registrado
+        p.usuarioId = nuevoUsuarioId;
+        // Limpiar el nombre de ocasional si tenía
+        if (p.metadata) {
+          delete p.metadata.nombreCliente;
+        }
+      } else {
+        // Es ocasional, actualizar nombreCliente
+        if (nuevoNombreCliente && p.metadata) {
+          p.metadata.nombreCliente = nuevoNombreCliente;
+        } else if (nuevoNombreCliente && !p.metadata) {
+          p.metadata = { nombreCliente: nuevoNombreCliente };
+        }
+      }
+      await this.pedidoRepository.save(p);
+    }
+    
+    // Si hay deuda asociada, también debemos transferirla
+    // (Asumimos que si hay una deuda con el mismo userId o nombreCliente y turno, se actualizaría, pero por ahora solo transferiremos en Pedidos. 
+    // Lo ideal es que la deuda se cree AL FINAL o transferir las deudas activas).
+    // Para no complicar, asumiendo que el garitero cambia esto ANTES de cobrar.
+    
+    return { success: true };
   }
 
   async updateStatus(pedidoId: number, estado: string, gariteroId?: number) {

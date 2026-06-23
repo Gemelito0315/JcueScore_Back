@@ -65,6 +65,14 @@ export class PedidosController {
   create(@Req() req: any, @Body() createPedidoDto: any) {
     return this.pedidosService.create(req.user.id, createPedidoDto);
   }
+  @Put('asignar-titular')
+  @ApiBearerAuth()
+  @Modules('orders')
+  @UseGuards(JwtAuthGuard, ModulesGuard)
+  @ApiOperation({ summary: 'Cambiar el titular (usuario o nombre ocasional) de una cuenta/pedidos' })
+  asignarTitular(@Body() body: { pedidoIds: number[]; nuevoUsuarioId: number | null; nuevoNombreCliente?: string }) {
+    return this.pedidosService.asignarTitular(body.pedidoIds, body.nuevoUsuarioId, body.nuevoNombreCliente);
+  }
 
   @Put(':id/estado')
   @ApiBearerAuth()

@@ -162,6 +162,25 @@ export class DeudasService {
     return result[0];
   }
 
+  async asignarTitular(oldUserId?: number, oldNombreCliente?: string, newUserId?: number, newNombreCliente?: string) {
+    const activeShift = await this.ds.query(`SELECT id FROM turno WHERE estado = 'abierto' ORDER BY "horaInicio" DESC LIMIT 1`);
+    if (activeShift.length === 0) return { success: false };
+    const shiftId = activeShift[0].id;
+
+    if (oldUserId) {
+      await this.ds.query(`
+        UPDATE deuda SET "userId" = $1, "nombreCliente" = $2 
+        WHERE "userId" = $3 AND estado != 'pagada' AND "turnoId" = $4
+      `, [newUserId || null, newNombreCliente || null, oldUserId, shiftId]);
+    } else if (oldNombreCliente) {
+      await this.ds.query(`
+        UPDATE deuda SET "userId" = $1, "nombreCliente" = $2 
+        WHERE "nombreCliente" = $3 AND "userId" IS NULL AND estado != 'pagada' AND "turnoId" = $4
+      `, [newUserId || null, newNombreCliente || null, oldNombreCliente, shiftId]);
+    }
+    return { success: true };
+  }
+
   async delete(id: number) {
     return this.ds.query(`DELETE FROM deuda WHERE id = $1`, [id]);
   }

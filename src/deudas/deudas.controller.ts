@@ -112,6 +112,12 @@ export class DeudasController {
     return this.deudasService.registrarPago(id, dto.montoPago, dto.metodoPago);
   }
 
+  @Put('asignar-titular')
+  @ApiOperation({ summary: 'Cambiar el titular de deudas' })
+  asignarTitular(@Body() body: { oldUserId?: number, oldNombreCliente?: string, newUserId?: number, newNombreCliente?: string }) {
+    return this.deudasService.asignarTitular(body.oldUserId, body.oldNombreCliente, body.newUserId, body.newNombreCliente);
+  }
+
   @Post(':id/pasar-historial')
   @ApiOperation({ summary: 'Pasar deuda de hoy a historial' })
   pasarAHistorial(@Param('id', ParseIntPipe) id: number) {
