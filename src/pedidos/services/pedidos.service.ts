@@ -96,6 +96,7 @@ export class PedidosService {
   }
 
   async create(usuarioId: number, createPedidoDto: any) {
+    try {
     const { items, recursoId, notas, metodoPago, direccionEntrega } =
       createPedidoDto;
 
@@ -246,6 +247,10 @@ export class PedidosService {
     }
 
     return savedFullPedido;
+    } catch (error) {
+      console.error('Error creating pedido:', error);
+      throw new BadRequestException('Error al crear pedido: ' + error.message);
+    }
   }
 
   async updateStatus(pedidoId: number, estado: string, gariteroId?: number) {
