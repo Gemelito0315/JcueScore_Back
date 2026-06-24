@@ -111,6 +111,7 @@ export class Pedido {
     prioridad: 'normal' | 'alta' | 'urgente';
     canalNotificacion: 'app' | 'sms' | 'email';
     ubicacionMesa?: string;
+    nombreCliente?: string;
   };
 
   @OneToMany(() => PedidoItem, (item) => item.pedido)

@@ -144,7 +144,6 @@ export class PedidosService implements OnModuleInit {
       throw new NotFoundException('Usuario no encontrado');
     }
     // Geolocation Validation
-    const origen = createPedidoDto.metadata?.origen;
     if (origen !== 'barra' && origen !== 'admin') {
       if (createPedidoDto.userLat && createPedidoDto.userLng) {
         try {
