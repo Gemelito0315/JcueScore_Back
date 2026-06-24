@@ -70,6 +70,24 @@ export class WebsocketsGateway
             this.logger.error('Error al obtener partidas activas en WebSocket:', e);
             client.send(JSON.stringify({ type: 'error', message: 'No se pudieron obtener las partidas activas' }));
           }
+        } else if (message.type === 'solicitar_cuenta') {
+          // Tablet pide la cuenta → broadcast a TODOS (el garitero lo recibirá)
+          this.logger.log(`Mesa ${message.mesaId} solicita la cuenta`);
+          this.broadcast('solicitar_cuenta', {
+            mesaId: message.mesaId,
+            datos: message.datos || {},
+          });
+        } else if (message.type === 'cerrar_cuenta') {
+          // Garitero cierra la cuenta → broadcast a la sala de la mesa (la tablet lo recibirá)
+          this.logger.log(`Garitero cierra la cuenta de Mesa ${message.mesaId}`);
+          this.broadcastToRoom(message.mesaId, 'match_update', {
+            mesaId: message.mesaId,
+            type: 'cerrar_cuenta',
+          });
+          // También broadcast global para que el panel de ventas se actualice
+          this.broadcast('cerrar_cuenta', { mesaId: message.mesaId });
+          // Limpiar match activo
+          this.activeMatches.delete(message.mesaId);
         }
       } catch (err) {
         this.logger.error('Error parseando mensaje WebSocket de cliente:', err);
