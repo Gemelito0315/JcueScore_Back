@@ -307,7 +307,12 @@ export class PedidosService implements OnModuleInit {
         if (nuevoNombreCliente && p.metadata) {
           p.metadata.nombreCliente = nuevoNombreCliente;
         } else if (nuevoNombreCliente && !p.metadata) {
-          p.metadata = { nombreCliente: nuevoNombreCliente };
+          p.metadata = { 
+            nombreCliente: nuevoNombreCliente,
+            origen: 'barra',
+            prioridad: 'normal',
+            canalNotificacion: 'app'
+          };
         }
       }
       await this.pedidoRepository.save(p);
