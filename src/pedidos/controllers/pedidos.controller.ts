@@ -15,7 +15,6 @@ import { PedidosService } from '../services/pedidos.service';
 import { JwtAuthGuard } from '../../auth/guards/auth.guard';
 import { ModulesGuard } from '../../auth/guards/modules.guard.guard';
 import { Modules } from '../../auth/decorators/modules.decorator';
-import { CreatePedidoDto } from '../dtos/create-pedido.dto';
 
 @ApiTags('Pedidos')
 @Controller('pedidos')
@@ -58,14 +57,26 @@ export class PedidosController {
     return this.pedidosService.findOne(+id);
   }
 
+  // ── ENDPOINT PÚBLICO PARA PEDIDOS DESDE LA MESA (SIN AUTH) ──
+  @Post('mesa')
+  @ApiOperation({ summary: 'Crear pedido desde la mesa (público, sin autenticación)' })
+  createFromMesa(@Body() body: any) {
+    // Forzar origen a 'mesa' para que el servicio no pida geolocalización
+    if (!body.metadata) body.metadata = {};
+    body.metadata.origen = 'mesa';
+    // Usar usuario por defecto (ID 1 = admin/default) ya que la mesa no tiene sesión
+    return this.pedidosService.create(1, body);
+  }
+
   @Post()
   @ApiBearerAuth()
   @Modules('orders')
   @UseGuards(JwtAuthGuard, ModulesGuard)
-  @ApiOperation({ summary: 'Crear nuevo pedido' })
-  create(@Req() req: any, @Body() createPedidoDto: CreatePedidoDto) {
+  @ApiOperation({ summary: 'Crear nuevo pedido (autenticado)' })
+  create(@Req() req: any, @Body() createPedidoDto: any) {
     return this.pedidosService.create(req.user.id, createPedidoDto);
   }
+
   @Put('asignar-titular')
   @ApiBearerAuth()
   @Modules('orders')

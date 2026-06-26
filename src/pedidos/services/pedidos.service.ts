@@ -12,7 +12,6 @@ import { User } from '../../users/entities/user.entity';
 import { Product } from '../../productos/entities/product.entity';
 import { WebsocketsGateway } from '../../websockets/websockets.gateway';
 import { PushNotificationsService } from '../../users/services/push-notifications/push-notifications.service';
-import { CreatePedidoDto } from '../dtos/create-pedido.dto';
 
 @Injectable()
 export class PedidosService implements OnModuleInit {
@@ -120,7 +119,7 @@ export class PedidosService implements OnModuleInit {
     });
   }
 
-  async create(usuarioId: number, createPedidoDto: CreatePedidoDto) {
+  async create(usuarioId: number, createPedidoDto: any) {
     try {
     const { items, recursoId, notas, metodoPago, direccionEntrega } =
       createPedidoDto;
