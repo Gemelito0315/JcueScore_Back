@@ -15,6 +15,7 @@ import { PedidosService } from '../services/pedidos.service';
 import { JwtAuthGuard } from '../../auth/guards/auth.guard';
 import { ModulesGuard } from '../../auth/guards/modules.guard.guard';
 import { Modules } from '../../auth/decorators/modules.decorator';
+import { CreatePedidoDto } from '../dtos/create-pedido.dto';
 
 @ApiTags('Pedidos')
 @Controller('pedidos')
@@ -62,7 +63,7 @@ export class PedidosController {
   @Modules('orders')
   @UseGuards(JwtAuthGuard, ModulesGuard)
   @ApiOperation({ summary: 'Crear nuevo pedido' })
-  create(@Req() req: any, @Body() createPedidoDto: any) {
+  create(@Req() req: any, @Body() createPedidoDto: CreatePedidoDto) {
     return this.pedidosService.create(req.user.id, createPedidoDto);
   }
   @Put('asignar-titular')
