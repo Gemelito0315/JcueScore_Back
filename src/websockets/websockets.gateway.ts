@@ -51,9 +51,12 @@ export class WebsocketsGateway
           } else {
              this.activeMatches.set(message.mesaId, message.state);
           }
-          // Para no romper nada anterior, enviamos a la sala Y también podemos enviar broadcast global si es necesario.
-          // Pero para optimizar, usamos broadcastToRoom.
+          // Enviar estado completo (con frame) solo a los clientes en la sala
           this.broadcastToRoom(message.mesaId, 'match_update', { mesaId: message.mesaId, state: message.state });
+          // Broadcast global sin el frame (para el panel garitero que no está en la sala)
+          const stateForGlobal = message.state ? { ...message.state, frame: undefined } : message.state;
+          this.broadcast('match_update', { mesaId: message.mesaId, state: stateForGlobal });
+
         } else if (message.type === 'join_match') {
           this.clientRooms.get(client)?.add(message.mesaId);
           const state = this.activeMatches.get(message.mesaId);
