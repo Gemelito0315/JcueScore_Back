@@ -181,6 +181,14 @@ export class DeudasService {
     return { success: true };
   }
 
+  async updateTitular(id: number, newUserId?: number, newNombreCliente?: string) {
+    await this.ds.query(`
+      UPDATE deuda SET "userId" = $1, "nombreCliente" = $2 
+      WHERE id = $3
+    `, [newUserId || null, newNombreCliente || null, id]);
+    return { success: true };
+  }
+
   async delete(id: number) {
     return this.ds.query(`DELETE FROM deuda WHERE id = $1`, [id]);
   }

@@ -114,9 +114,18 @@ export class DeudasController {
   }
 
   @Put('asignar-titular')
-  @ApiOperation({ summary: 'Cambiar el titular de deudas' })
+  @ApiOperation({ summary: 'Cambiar el titular de deudas (por batch)' })
   asignarTitular(@Body() body: { oldUserId?: number, oldNombreCliente?: string, newUserId?: number, newNombreCliente?: string }) {
     return this.deudasService.asignarTitular(body.oldUserId, body.oldNombreCliente, body.newUserId, body.newNombreCliente);
+  }
+
+  @Put(':id/titular')
+  @ApiOperation({ summary: 'Cambiar el titular de una sola deuda' })
+  updateTitular(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { newUserId?: number, newNombreCliente?: string }
+  ) {
+    return this.deudasService.updateTitular(id, body.newUserId, body.newNombreCliente);
   }
 
   @Post(':id/pasar-historial')
