@@ -83,6 +83,7 @@ export class WebsocketsGateway
           this.broadcastToRoom(message.mesaId, 'match_update', {
             mesaId: message.mesaId,
             type: 'cerrar_cuenta',
+            resumen: message.resumen || null, // costo de tiempo + consumos del garitero
           });
           // También broadcast global para que el panel de ventas se actualice
           this.broadcast('cerrar_cuenta', { mesaId: message.mesaId });
