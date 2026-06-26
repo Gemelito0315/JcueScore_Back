@@ -52,7 +52,7 @@ export class CreatePedidoDto {
   @IsOptional()
   @IsObject()
   metadata?: {
-    origen?: 'mesa' | 'barra' | 'app' | 'telefono';
+    origen?: 'mesa' | 'barra' | 'app' | 'telefono' | 'admin';
     prioridad?: 'normal' | 'alta' | 'urgente';
     canalNotificacion?: 'app' | 'sms' | 'email';
     ubicacionMesa?: string;
