@@ -119,7 +119,9 @@ export class PartidasService {
     // Register active match in the Websocket Gateway so Espectador TV sees it immediately
     const state = {
       partidaIniciada: true,
+      timerActivo: true, // <-- Esto faltaba para que la tablet arranque su cronómetro
       tiempoSegundos: 0,
+      tiempoInicio: new Date().toISOString(), // <-- Para asegurar que tengan la misma hora
       jugadores: [
         { nombre: jugador1?.name || jugadores[0] || 'Jugador 1', puntos: 0, meta: 15 },
         { nombre: jugador2?.name || jugadores[1] || 'Invitado', puntos: 0, meta: 15 }
