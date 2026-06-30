@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { WebsocketsGateway } from '../websockets/websockets.gateway';
 
 export interface MaintenanceConfig {
   active: boolean;
@@ -9,6 +10,8 @@ export interface MaintenanceConfig {
 
 @Injectable()
 export class MantenimientoService {
+  constructor(private readonly wsGateway: WebsocketsGateway) {}
+
   private config: MaintenanceConfig = {
     active: false,
     message: 'Estamos realizando mejoras en el sistema',
@@ -28,6 +31,14 @@ export class MantenimientoService {
       estimatedTime: data.estimatedTime || '',
       timestamp: new Date().toISOString(),
     };
+
+    // Broadcast a todos los clientes conectados por WebSocket
+    this.wsGateway.broadcast('sistema_mantenimiento', {
+      activo: this.config.active,
+      mensaje: this.config.message,
+      estimatedTime: this.config.estimatedTime,
+    });
+
     return this.config;
   }
 }
